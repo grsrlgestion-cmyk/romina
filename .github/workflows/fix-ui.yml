@@ -1,0 +1,67 @@
+name: Corregir interfaz COPAFEM
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-ui.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  corregir:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Corregir acceso, visibilidad y logo
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Mostrar siempre el logo real publicado como JPG.
+          s = s.replace('src="logo.svg"', 'src="logo.jpg?v=3"')
+
+          # Asegurar que las pantallas ocultas no dejen menús fijos visibles.
+          marker = '/* Role gateway and player app */\n'
+          hidden_rule = '#roleGateway[hidden],#playerApp[hidden],#adminApp[hidden]{display:none!important}\n'
+          if hidden_rule not in s:
+              if marker not in s:
+                  raise SystemExit('No se encontró el marcador CSS de roles')
+              s = s.replace(marker, marker + hidden_rule, 1)
+
+          # Entrar al modo jugador de inmediato; la sincronización queda en segundo plano.
+          old_player = 'async function openPlayer(){ $("#roleGateway").hidden=true;$("#adminApp").hidden=true;$("#playerApp").hidden=false; await remoteLoad({force:true,player:true}); renderPlayerAll(); startPlayerPolling(); window.scrollTo(0,0); }'
+          new_player = 'function openPlayer(){ $("#roleGateway").hidden=true;$("#adminApp").hidden=true;$("#adminLogin").hidden=true;$("#playerApp").hidden=false; renderPlayerAll(); startPlayerPolling(); remoteLoad({force:true,player:true}); window.scrollTo(0,0); }'
+          if old_player in s:
+              s = s.replace(old_player, new_player, 1)
+          elif new_player not in s:
+              raise SystemExit('No se encontró la función openPlayer esperada')
+
+          # Evitar que la sincronización inicial devuelva al usuario a la portada después de hacer clic.
+          old_start = 'renderAll();\nremoteLoad({force:true}).then(()=>showGateway()).catch(()=>showGateway());'
+          new_start = 'showGateway();\nrenderAll();\nremoteLoad({force:true}).catch(()=>{});'
+          if old_start in s:
+              s = s.replace(old_start, new_start, 1)
+          elif new_start not in s:
+              raise SystemExit('No se encontró el arranque esperado')
+
+          s = s.replace('content="2.1.0"', 'content="2.1.1"', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Guardar corrección
+        shell: bash
+        run: |
+          git config user.name "COPAFEM Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Corregir acceso Jugador/Admin y mostrar logo COPAFEM"
+            git push
+          fi
