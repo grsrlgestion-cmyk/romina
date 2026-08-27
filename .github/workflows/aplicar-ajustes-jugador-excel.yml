@@ -75,35 +75,35 @@ jobs:
           )
 
           excel_function = r'''
-  function exportDropExcel(){
-    const date=state.tournament.date;
-    const events=eventsOnDate(date);
-    if(!events.length) return toast("No hay categorías cargadas para descargar");
-    const h=s=>String(s??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;"}[c]));
-    const resultText=m=>Number.isFinite(m?.s1)&&Number.isFinite(m?.s2)?`${m.s1}-${m.s2}`:"";
-    let body=`<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif}h1{font-size:20px}h2{margin-top:28px;background:#eaf2fb;padding:8px}h3{margin-top:18px}table{border-collapse:collapse;margin:8px 0 18px;width:100%}th,td{border:1px solid #b8c4d1;padding:6px;font-size:12px}th{background:#dfeaf6;font-weight:bold}</style></head><body>`;
-    body+=`<h1>COPAFEM · Drop completo · ${h(formatDate(date))}</h1>`;
-    events.forEach(([,ev])=>{
-      body+=`<h2>${h(ev.tournament.category)} · Canchas ${h((ev.tournament.courts||[]).join(", ")||"—")}</h2>`;
-      body+=`<h3>Zonas</h3><table><tr><th>Zona</th><th>Posición</th><th>Pareja</th></tr>`;
-      ZONES.forEach(z=>(ev.zones?.[z]||[]).forEach((pid,i)=>{body+=`<tr><td>${h(z)}</td><td>${i+1}</td><td>${h(pairNameForEvent(ev,pid))}</td></tr>`;}));
-      body+=`</table>`;
+            function exportDropExcel(){
+              const date=state.tournament.date;
+              const events=eventsOnDate(date);
+              if(!events.length) return toast("No hay categorías cargadas para descargar");
+              const h=s=>String(s??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;"}[c]));
+              const resultText=m=>Number.isFinite(m?.s1)&&Number.isFinite(m?.s2)?`${m.s1}-${m.s2}`:"";
+              let body=`<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif}h1{font-size:20px}h2{margin-top:28px;background:#eaf2fb;padding:8px}h3{margin-top:18px}table{border-collapse:collapse;margin:8px 0 18px;width:100%}th,td{border:1px solid #b8c4d1;padding:6px;font-size:12px}th{background:#dfeaf6;font-weight:bold}</style></head><body>`;
+              body+=`<h1>COPAFEM · Drop completo · ${h(formatDate(date))}</h1>`;
+              events.forEach(([,ev])=>{
+                body+=`<h2>${h(ev.tournament.category)} · Canchas ${h((ev.tournament.courts||[]).join(", ")||"—")}</h2>`;
+                body+=`<h3>Zonas</h3><table><tr><th>Zona</th><th>Posición</th><th>Pareja</th></tr>`;
+                ZONES.forEach(z=>(ev.zones?.[z]||[]).forEach((pid,i)=>{body+=`<tr><td>${h(z)}</td><td>${i+1}</td><td>${h(pairNameForEvent(ev,pid))}</td></tr>`;}));
+                body+=`</table>`;
 
-      const addMatches=(title,matches,stageFn)=>{
-        body+=`<h3>${h(title)}</h3><table><tr><th>Etapa</th><th>Hora</th><th>Cancha</th><th>Pareja 1</th><th>Pareja 2</th><th>Resultado</th></tr>`;
-        (matches||[]).forEach(m=>{body+=`<tr><td>${h(stageFn(m))}</td><td>${h(m.time||"")}</td><td>${h(m.court??"")}</td><td>${h(pairNameForEvent(ev,m.p1))}</td><td>${h(pairNameForEvent(ev,m.p2))}</td><td>${h(resultText(m))}</td></tr>`;});
-        body+=`</table>`;
-      };
-      addMatches("Partidos de zona",ev.zoneMatches,m=>`Zona ${m.zone}`);
-      addMatches("Copa de Oro",ev.brackets?.gold,m=>m.round||"");
-      addMatches("Copa de Plata",ev.brackets?.silver,m=>m.round||"");
-    });
-    body+=`</body></html>`;
-    download(`COPAFEM_DROP_${safeName(date||"fecha")}.xls`,"\ufeff"+body,"application/vnd.ms-excel;charset=utf-8");
-    toast("Excel del drop descargado");
-  }
+                const addMatches=(title,matches,stageFn)=>{
+                  body+=`<h3>${h(title)}</h3><table><tr><th>Etapa</th><th>Hora</th><th>Cancha</th><th>Pareja 1</th><th>Pareja 2</th><th>Resultado</th></tr>`;
+                  (matches||[]).forEach(m=>{body+=`<tr><td>${h(stageFn(m))}</td><td>${h(m.time||"")}</td><td>${h(m.court??"")}</td><td>${h(pairNameForEvent(ev,m.p1))}</td><td>${h(pairNameForEvent(ev,m.p2))}</td><td>${h(resultText(m))}</td></tr>`;});
+                  body+=`</table>`;
+                };
+                addMatches("Partidos de zona",ev.zoneMatches,m=>`Zona ${m.zone}`);
+                addMatches("Copa de Oro",ev.brackets?.gold,m=>m.round||"");
+                addMatches("Copa de Plata",ev.brackets?.silver,m=>m.round||"");
+              });
+              body+=`</body></html>`;
+              download(`COPAFEM_DROP_${safeName(date||"fecha")}.xls`,"\ufeff"+body,"application/vnd.ms-excel;charset=utf-8");
+              toast("Excel del drop descargado");
+            }
 
-'''
+          '''
           marker='  function exportJSON(){ download(`COPAFEM_fechas_respaldo.json`,JSON.stringify(store,null,2),"application/json"); }'
           if marker not in text:
               raise SystemExit('No se encontró el punto para insertar exportDropExcel')
