@@ -1,0 +1,143 @@
+name: Aplicar ajustes Jugador y Excel
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aplicar-ajustes-jugador-excel.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  actualizar-y-publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Aplicar cambios en la app
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          def replace_once(old, new, label):
+              global text
+              if old not in text:
+                  raise SystemExit(f'No se encontró el bloque para: {label}')
+              text = text.replace(old, new, 1)
+
+          # 1) En Jugador/a mostrar únicamente el nombre individual, no la pareja completa.
+          replace_once(
+              's.innerHTML=opts.length?opts.map(o=>`<option value="${ehtml(o.value)}">${ehtml(o.name)} · ${ehtml(o.pair)}</option>`).join(""):`<option value="">Aún no hay parejas cargadas</option>`;',
+              's.innerHTML=opts.length?opts.map(o=>`<option value="${ehtml(o.value)}">${ehtml(o.name)}</option>`).join(""):`<option value="">Aún no hay parejas cargadas</option>`;',
+              'selector de jugador individual'
+          )
+
+          replace_once(
+              'const value=el("playerName").value||"";selectedPairId=value.split("|||")[0]||selectedPairId;',
+              'const value=el("playerName").value||"";const playerValueParts=value.split("|||");selectedPairId=playerValueParts[0]||selectedPairId;const selectedPlayerName=playerValueParts[1]||"";',
+              'lectura de jugador seleccionado'
+          )
+
+          replace_once(
+              'el("playerPairLabel").textContent=pairName(ev,selectedPairId);',
+              'el("playerPairLabel").textContent=selectedPlayerName||playerNamesFromPair({name:pairName(ev,selectedPairId)})[0]||"";',
+              'etiqueta del jugador en Mis partidos'
+          )
+
+          # 2) Botón Descargar Excel dentro de Drop completo del administrador.
+          replace_once(
+              '<button id="dropPrintBtn" class="btn primary" type="button">Imprimir drop</button>',
+              '<button id="dropExcelBtn" class="btn" type="button">Descargar Excel</button>\n          <button id="dropPrintBtn" class="btn primary" type="button">Imprimir drop</button>',
+              'botón Descargar Excel'
+          )
+
+          replace_once(
+              '$("dropPrintBtn").addEventListener("click", ()=>{setView("drop"); setTimeout(()=>window.print(),120);});',
+              '$("dropExcelBtn").addEventListener("click", exportDropExcel);\n    $("dropPrintBtn").addEventListener("click", ()=>{setView("drop"); setTimeout(()=>window.print(),120);});',
+              'evento del botón Descargar Excel'
+          )
+
+          excel_function = r'''
+  function exportDropExcel(){
+    const date=state.tournament.date;
+    const events=eventsOnDate(date);
+    if(!events.length) return toast("No hay categorías cargadas para descargar");
+    const h=s=>String(s??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;"}[c]));
+    const resultText=m=>Number.isFinite(m?.s1)&&Number.isFinite(m?.s2)?`${m.s1}-${m.s2}`:"";
+    let body=`<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif}h1{font-size:20px}h2{margin-top:28px;background:#eaf2fb;padding:8px}h3{margin-top:18px}table{border-collapse:collapse;margin:8px 0 18px;width:100%}th,td{border:1px solid #b8c4d1;padding:6px;font-size:12px}th{background:#dfeaf6;font-weight:bold}</style></head><body>`;
+    body+=`<h1>COPAFEM · Drop completo · ${h(formatDate(date))}</h1>`;
+    events.forEach(([,ev])=>{
+      body+=`<h2>${h(ev.tournament.category)} · Canchas ${h((ev.tournament.courts||[]).join(", ")||"—")}</h2>`;
+      body+=`<h3>Zonas</h3><table><tr><th>Zona</th><th>Posición</th><th>Pareja</th></tr>`;
+      ZONES.forEach(z=>(ev.zones?.[z]||[]).forEach((pid,i)=>{body+=`<tr><td>${h(z)}</td><td>${i+1}</td><td>${h(pairNameForEvent(ev,pid))}</td></tr>`;}));
+      body+=`</table>`;
+
+      const addMatches=(title,matches,stageFn)=>{
+        body+=`<h3>${h(title)}</h3><table><tr><th>Etapa</th><th>Hora</th><th>Cancha</th><th>Pareja 1</th><th>Pareja 2</th><th>Resultado</th></tr>`;
+        (matches||[]).forEach(m=>{body+=`<tr><td>${h(stageFn(m))}</td><td>${h(m.time||"")}</td><td>${h(m.court??"")}</td><td>${h(pairNameForEvent(ev,m.p1))}</td><td>${h(pairNameForEvent(ev,m.p2))}</td><td>${h(resultText(m))}</td></tr>`;});
+        body+=`</table>`;
+      };
+      addMatches("Partidos de zona",ev.zoneMatches,m=>`Zona ${m.zone}`);
+      addMatches("Copa de Oro",ev.brackets?.gold,m=>m.round||"");
+      addMatches("Copa de Plata",ev.brackets?.silver,m=>m.round||"");
+    });
+    body+=`</body></html>`;
+    download(`COPAFEM_DROP_${safeName(date||"fecha")}.xls`,"\ufeff"+body,"application/vnd.ms-excel;charset=utf-8");
+    toast("Excel del drop descargado");
+  }
+
+'''
+          marker='  function exportJSON(){ download(`COPAFEM_fechas_respaldo.json`,JSON.stringify(store,null,2),"application/json"); }'
+          if marker not in text:
+              raise SystemExit('No se encontró el punto para insertar exportDropExcel')
+          text=text.replace(marker, excel_function+marker, 1)
+
+          # Actualizar versión visible para ayudar a evitar confusión con caché del navegador.
+          text=text.replace('<meta name="copafem-app-version" content="2.1.0">','<meta name="copafem-app-version" content="2.1.1">',1)
+
+          path.write_text(text,encoding='utf-8')
+          PY
+
+      - name: Guardar cambios en GitHub
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No hay cambios para guardar"
+          else
+            git commit -m "Ajustar jugador individual y descarga Excel"
+            git push origin main
+          fi
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      - name: Preparar sitio
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Publicar
+        id: deployment
+        uses: actions/deploy-pages@v4
