@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#8eb9e8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="copafem-app-version" content="2.1.0">
+  <meta name="copafem-app-version" content="2.1.1">
   <title>COPAFEM · Torneos</title>
   <style>
 :root{
@@ -317,6 +317,7 @@ López Martín / Ruiz Laura
           <button id="dropZoomOut" class="btn" type="button">−</button>
           <span id="dropZoomLabel" class="drop-zoom-label">85%</span>
           <button id="dropZoomIn" class="btn" type="button">+</button>
+          <button id="dropExcelBtn" class="btn" type="button">Descargar Excel</button>
           <button id="dropPrintBtn" class="btn primary" type="button">Imprimir drop</button>
         </div>
       </div>
@@ -613,6 +614,7 @@ López Martín / Ruiz Laura
     $("importJsonInput").addEventListener("change", importJSON);
     $("resetAllBtn").addEventListener("click", resetActiveEvent);
     $("printBtn").addEventListener("click", ()=>window.print());
+    $("dropExcelBtn").addEventListener("click", exportDropExcel);
     $("dropPrintBtn").addEventListener("click", ()=>{setView("drop"); setTimeout(()=>window.print(),120);});
     $("dropFitBtn").addEventListener("click", fitDrop);
     $("dropZoomOut").addEventListener("click", ()=>setDropZoom(dropZoom-.05));
@@ -987,6 +989,35 @@ López Martín / Ruiz Laura
     }).join(""):`<tr><td colspan="7">Todavía no hay cronograma para esta fecha.</td></tr>`;
   }
 
+
+  function exportDropExcel(){
+    const date=state.tournament.date;
+    const events=eventsOnDate(date);
+    if(!events.length) return toast("No hay categorías cargadas para descargar");
+    const h=s=>String(s??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;"}[c]));
+    const resultText=m=>Number.isFinite(m?.s1)&&Number.isFinite(m?.s2)?`${m.s1}-${m.s2}`:"";
+    let body=`<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif}h1{font-size:20px}h2{margin-top:28px;background:#eaf2fb;padding:8px}h3{margin-top:18px}table{border-collapse:collapse;margin:8px 0 18px;width:100%}th,td{border:1px solid #b8c4d1;padding:6px;font-size:12px}th{background:#dfeaf6;font-weight:bold}</style></head><body>`;
+    body+=`<h1>COPAFEM · Drop completo · ${h(formatDate(date))}</h1>`;
+    events.forEach(([,ev])=>{
+      body+=`<h2>${h(ev.tournament.category)} · Canchas ${h((ev.tournament.courts||[]).join(", ")||"—")}</h2>`;
+      body+=`<h3>Zonas</h3><table><tr><th>Zona</th><th>Posición</th><th>Pareja</th></tr>`;
+      ZONES.forEach(z=>(ev.zones?.[z]||[]).forEach((pid,i)=>{body+=`<tr><td>${h(z)}</td><td>${i+1}</td><td>${h(pairNameForEvent(ev,pid))}</td></tr>`;}));
+      body+=`</table>`;
+
+      const addMatches=(title,matches,stageFn)=>{
+        body+=`<h3>${h(title)}</h3><table><tr><th>Etapa</th><th>Hora</th><th>Cancha</th><th>Pareja 1</th><th>Pareja 2</th><th>Resultado</th></tr>`;
+        (matches||[]).forEach(m=>{body+=`<tr><td>${h(stageFn(m))}</td><td>${h(m.time||"")}</td><td>${h(m.court??"")}</td><td>${h(pairNameForEvent(ev,m.p1))}</td><td>${h(pairNameForEvent(ev,m.p2))}</td><td>${h(resultText(m))}</td></tr>`;});
+        body+=`</table>`;
+      };
+      addMatches("Partidos de zona",ev.zoneMatches,m=>`Zona ${m.zone}`);
+      addMatches("Copa de Oro",ev.brackets?.gold,m=>m.round||"");
+      addMatches("Copa de Plata",ev.brackets?.silver,m=>m.round||"");
+    });
+    body+=`</body></html>`;
+    download(`COPAFEM_DROP_${safeName(date||"fecha")}.xls`,"\ufeff"+body,"application/vnd.ms-excel;charset=utf-8");
+    toast("Excel del drop descargado");
+  }
+
   function exportJSON(){ download(`COPAFEM_fechas_respaldo.json`,JSON.stringify(store,null,2),"application/json"); }
 
   function importJSON(ev){
@@ -1072,7 +1103,7 @@ López Martín / Ruiz Laura
     const ev=found[1], opts=[];
     (ev.pairs||[]).forEach(p=>playerNamesFromPair(p).forEach(name=>opts.push({value:`${p.id}|||${name}`,name,pair:p.name})));
     opts.sort((a,b)=>a.name.localeCompare(b.name,"es"));
-    s.innerHTML=opts.length?opts.map(o=>`<option value="${ehtml(o.value)}">${ehtml(o.name)} · ${ehtml(o.pair)}</option>`).join(""):`<option value="">Aún no hay parejas cargadas</option>`;
+    s.innerHTML=opts.length?opts.map(o=>`<option value="${ehtml(o.value)}">${ehtml(o.name)}</option>`).join(""):`<option value="">Aún no hay parejas cargadas</option>`;
     selectedPairId=opts[0]?.value.split("|||")[0]||"";renderPlayer();
   }
 
@@ -1106,9 +1137,9 @@ López Martín / Ruiz Laura
   }
 
   function renderPlayer(){
-    const value=el("playerName").value||"";selectedPairId=value.split("|||")[0]||selectedPairId;
+    const value=el("playerName").value||"";const playerValueParts=value.split("|||");selectedPairId=playerValueParts[0]||selectedPairId;const selectedPlayerName=playerValueParts[1]||"";
     const found=eventFor(el("playerDate").value,el("playerCategory").value);if(!found||!selectedPairId){el("playerEmpty").hidden=false;el("playerContent").hidden=true;return;}
-    const ev=found[1],cat=ev.tournament.category;applyPlayerTheme(cat);el("playerEmpty").hidden=true;el("playerContent").hidden=false;el("playerCatBadge").textContent=cat;el("playerPairLabel").textContent=pairName(ev,selectedPairId);el("playerDropLabel").textContent=`${cat} · ${formatDate(ev.tournament.date)}`;
+    const ev=found[1],cat=ev.tournament.category;applyPlayerTheme(cat);el("playerEmpty").hidden=true;el("playerContent").hidden=false;el("playerCatBadge").textContent=cat;el("playerPairLabel").textContent=selectedPlayerName||playerNamesFromPair({name:pairName(ev,selectedPairId)})[0]||"";el("playerDropLabel").textContent=`${cat} · ${formatDate(ev.tournament.date)}`;
     const matches=allMatches(ev), mine=matches.filter(m=>m.p1===selectedPairId||m.p2===selectedPairId);const next=mine.find(m=>!scored(m));
     el("playerNextMatch").innerHTML=next?`<div class="player-next-time"><div class="player-time-box"><strong>${ehtml(next.time||"—")}</strong><span>${ehtml(next.stage)}</span></div><div class="player-next-info"><b>${ehtml(pairName(ev,next.p1))}</b><b>vs. ${ehtml(pairName(ev,next.p2))}</b><small>Cancha <span class="court-big">${ehtml(next.court??"—")}</span></small></div></div>`:`<div class="empty-player">No hay otro partido confirmado por el momento.</div>`;
     el("playerMatches").innerHTML=mine.length?mine.map(m=>matchCard(ev,m,true)).join(""):`<div class="empty-player">Todavía no hay partidos asignados a esta pareja.</div>`;
