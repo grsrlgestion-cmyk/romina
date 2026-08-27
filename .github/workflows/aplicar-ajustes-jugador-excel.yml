@@ -2,7 +2,7 @@ name: Aplicar ajustes Jugador y Excel
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
     paths:
       - '.github/workflows/aplicar-ajustes-jugador-excel.yml'
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "copafem-ajustes"
   cancel-in-progress: false
 
 jobs:
@@ -44,7 +44,6 @@ jobs:
                   raise SystemExit(f'No se encontró el bloque para: {label}')
               text = text.replace(old, new, 1)
 
-          # 1) En Jugador/a mostrar únicamente el nombre individual, no la pareja completa.
           replace_once(
               's.innerHTML=opts.length?opts.map(o=>`<option value="${ehtml(o.value)}">${ehtml(o.name)} · ${ehtml(o.pair)}</option>`).join(""):`<option value="">Aún no hay parejas cargadas</option>`;',
               's.innerHTML=opts.length?opts.map(o=>`<option value="${ehtml(o.value)}">${ehtml(o.name)}</option>`).join(""):`<option value="">Aún no hay parejas cargadas</option>`;',
@@ -63,7 +62,6 @@ jobs:
               'etiqueta del jugador en Mis partidos'
           )
 
-          # 2) Botón Descargar Excel dentro de Drop completo del administrador.
           replace_once(
               '<button id="dropPrintBtn" class="btn primary" type="button">Imprimir drop</button>',
               '<button id="dropExcelBtn" class="btn" type="button">Descargar Excel</button>\n          <button id="dropPrintBtn" class="btn primary" type="button">Imprimir drop</button>',
@@ -110,10 +108,7 @@ jobs:
           if marker not in text:
               raise SystemExit('No se encontró el punto para insertar exportDropExcel')
           text=text.replace(marker, excel_function+marker, 1)
-
-          # Actualizar versión visible para ayudar a evitar confusión con caché del navegador.
           text=text.replace('<meta name="copafem-app-version" content="2.1.0">','<meta name="copafem-app-version" content="2.1.1">',1)
-
           path.write_text(text,encoding='utf-8')
           PY
 
@@ -132,6 +127,8 @@ jobs:
 
       - name: Configurar Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Preparar sitio
         uses: actions/upload-pages-artifact@v3
