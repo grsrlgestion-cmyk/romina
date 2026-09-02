@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#8eb9e8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="copafem-app-version" content="2.1.3">
+  <meta name="copafem-app-version" content="2.1.4">
   <title>COPAFEM · Torneos</title>
   <style>
 :root{
@@ -79,23 +79,80 @@ button,input,select,textarea{font:inherit}.topbar{position:sticky;top:0;z-index:
 
 @media(max-width:700px){.role-grid,.player-summary{grid-template-columns:1fr}.player-select-grid{grid-template-columns:1fr}.player-main{padding:12px}.player-match{grid-template-columns:67px 1fr 62px}.player-time-box{min-width:75px}.role-shell{padding:15px 12px 34px}.role-card{padding:19px}.top-actions{flex-wrap:wrap;justify-content:flex-end}}
 
+
+/* ===== PORTADA COPAFEM ===== */
+.cover-gateway{
+  min-height:100vh;
+  background:#f7f9fc;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:0;
+  overflow-x:hidden;
+}
+.cover-stage{
+  position:relative;
+  width:min(100vw,1672px);
+  aspect-ratio:1672/941;
+  margin:0 auto;
+  background:#fff;
+}
+.cover-image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.cover-hit{
+  position:absolute;
+  z-index:5;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  padding:0;
+  border-radius:26px;
+  -webkit-tap-highlight-color:transparent;
+}
+.cover-hit:focus-visible{
+  outline:4px solid rgba(31,78,130,.45);
+  outline-offset:3px;
+}
+.cover-player{left:15.8%;top:71.2%;width:23.1%;height:10.8%;}
+.cover-admin{left:83.7%;top:68.1%;width:10.5%;height:16.5%;}
+.cover-login{
+  position:fixed!important;
+  z-index:100!important;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(460px,calc(100vw - 28px));
+  margin:0!important;
+  box-shadow:0 22px 70px rgba(13,43,78,.28)!important;
+}
+@media(max-width:700px){
+  .cover-gateway{min-height:auto;background:#fff;}
+  .cover-stage{width:100vw;}
+  .cover-player{left:14.5%;top:69.5%;width:27%;height:14%;}
+  .cover-admin{left:81.5%;top:64.5%;width:17%;height:24%;}
+}
+
   </style>
 </head>
 <body>
 
-  <section id="roleGateway" class="role-shell">
-    <div class="role-wrap">
-      <div class="role-brand"><img class="role-logo" src="data:image/webp;base64,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" alt="COPAFEM"><div><h1>COPAFEM</h1><p>Torneos · Argentina</p></div></div>
-      <p class="role-intro">Elegí cómo querés ingresar. Los jugadores consultan sus partidos de forma simple; la administración está protegida por contraseña.</p>
-      <div class="role-grid">
-        <button id="choosePlayer" class="role-card" type="button"><div class="role-icon">🎾</div><h2>Jugador</h2><p>Elegí la fecha, tu categoría y tu nombre para ver próximo partido, cancha, zona, resultados y drop.</p></button>
-        <button id="chooseAdmin" class="role-card admin-role" type="button"><div class="role-icon">🔐</div><h2>Administrador</h2><p>Crear fechas y categorías, seleccionar canchas, cargar parejas y resultados, administrar Oro y Plata.</p></button>
-      </div>
-      <div id="adminLogin" class="login-card" hidden>
-        <h2>Acceso administrador</h2><p>Ingresá la contraseña para abrir el panel de organización.</p>
-        <form id="adminLoginForm"><label>Contraseña<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Contraseña de administrador"></label><div class="login-actions"><button class="btn primary" type="submit">Ingresar</button><button id="cancelAdminLogin" class="btn" type="button">Volver</button></div><div id="adminLoginError" class="login-error" aria-live="polite"></div></form>
-      </div>
-      <div class="role-foot">COPAFEM · Gestión y consulta de torneos</div>
+  <section id="roleGateway" class="cover-gateway">
+    <div class="cover-stage">
+      <img class="cover-image" src="portada-copafem.webp" alt="COPAFEM · Ingreso">
+      <button id="choosePlayer" class="cover-hit cover-player" type="button" aria-label="Soy jugador"></button>
+      <button id="chooseAdmin" class="cover-hit cover-admin" type="button" aria-label="Administrador"></button>
+    </div>
+    <div id="adminLogin" class="login-card cover-login" hidden>
+      <h2>Acceso administrador</h2><p>Ingresá la contraseña para abrir el panel de organización.</p>
+      <form id="adminLoginForm"><label>Contraseña<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Contraseña de administrador"></label><div class="login-actions"><button class="btn primary" type="submit">Ingresar</button><button id="cancelAdminLogin" class="btn" type="button">Volver</button></div><div id="adminLoginError" class="login-error" aria-live="polite"></div></form>
     </div>
   </section>
 
