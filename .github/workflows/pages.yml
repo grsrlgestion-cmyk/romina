@@ -23,12 +23,8 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
-      - name: Aplicar portada profesional COPAFEM
+      - name: Aplicar portada aprobada COPAFEM
         run: python tools/patch_portada_profesional.py
-      - name: Ajustar visual final de portada
-        run: python tools/ajuste_visual_portada.py
-      - name: Corregir HTML de la portada
-        run: python tools/fix_portada_html.py
       - name: Limpiar cache antigua de la app
         run: python tools/disable_old_sw.py
       - name: Configurar Pages
