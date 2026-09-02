@@ -23,6 +23,10 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
+      - name: Forzar portada nueva sin cache
+        run: |
+          sed -i 's|src="portada-copafem.webp"|src="portada-copafem.webp?v=20260902-1655"|g' index.html
+          sed -i 's|register("sw.js")|register("sw.js?v=20260902-1655")|g' index.html
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
