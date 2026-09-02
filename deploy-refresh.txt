@@ -1,0 +1,2 @@
+Forzar nueva publicación de GitHub Pages con los cambios de Jugador y Descargar Excel.
+Fecha: 2026-09-01
