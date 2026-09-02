@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -23,6 +23,115 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
+
+      - name: Mejorar Excel para canchero
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          text = p.read_text(encoding='utf-8')
+
+          new_func = r'''  function exportDropExcel(){
+    const date=state.tournament.date;
+    const events=eventsOnDate(date);
+    if(!events.length) return toast("No hay categorías cargadas para descargar");
+    const h=s=>String(s??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;"}[c]));
+    const resultText=m=>Number.isFinite(m?.s1)&&Number.isFinite(m?.s2)?`${m.s1}-${m.s2}`:"";
+    const sortedMatches=matches=>[...(matches||[])].sort((a,b)=>(a.time||"99:99").localeCompare(b.time||"99:99") || Number(a.court||999)-Number(b.court||999));
+    const cellStyle=(bg,color="#223a5e",bold=false)=>`background-color:${bg};color:${color};${bold?"font-weight:bold;":""}`;
+    const resultCell=m=>{ const r=resultText(m); return r?`<td class="result">&#8203;${h(r)}</td>`:`<td class="result"></td>`; };
+
+    let body=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>
+      body{font-family:Arial,sans-serif;color:#223a5e}
+      h1{font-size:21px;margin:0 0 14px}
+      h2{margin-top:28px;padding:9px 10px;color:#fff;font-size:17px}
+      h3{margin-top:18px;font-size:15px}
+      table{border-collapse:collapse;margin:8px 0 20px;width:100%}
+      th,td{border:1px solid #b8c4d1;padding:6px 7px;font-size:12px;vertical-align:middle}
+      th{font-weight:bold}
+      .time{mso-number-format:"\\@";font-weight:bold;text-align:center;white-space:nowrap}
+      .court{text-align:center;font-weight:bold}
+      .result{mso-number-format:"\\@";text-align:center;font-weight:bold;white-space:nowrap}
+      .cat{font-weight:bold;text-align:center;color:#fff}
+      .note{font-size:11px;color:#5d6e84;margin-bottom:12px}
+    </style></head><body>`;
+
+    body+=`<h1>COPAFEM · Cronograma para canchero · ${h(formatDate(date))}</h1>`;
+    body+=`<div class="note">Ordenado por horario y cancha. Los colores identifican cada categoría.</div>`;
+    body+=`<table><tr><th>Hora</th><th>Cancha</th><th>Categoría</th><th>Etapa</th><th>Pareja 1</th><th>Pareja 2</th><th>Resultado</th></tr>`;
+    activeDateScheduledRows().forEach(m=>{
+      const c=CATEGORY_COLORS[m.category]||CATEGORY_COLORS["7ma"];
+      const bg=c.soft, ink=c.ink;
+      body+=`<tr>`+
+        `<td class="time" style="${cellStyle(bg,ink,true)}">${h(m.time||"")}</td>`+
+        `<td class="court" style="${cellStyle(bg,ink,true)}">${h(m.court??"")}</td>`+
+        `<td class="cat" style="background-color:${c.main};color:#ffffff;font-weight:bold;text-align:center">${h(m.category)}</td>`+
+        `<td style="${cellStyle(bg,ink)}">${h(m.stage)}</td>`+
+        `<td style="${cellStyle(bg,ink)}">${h(m.p1?pairNameForEvent(m.event,m.p1):"A definir")}</td>`+
+        `<td style="${cellStyle(bg,ink)}">${h(m.p2?pairNameForEvent(m.event,m.p2):"A definir")}</td>`+
+        (Number.isFinite(m.s1)&&Number.isFinite(m.s2)?`<td class="result" style="${cellStyle(bg,ink,true)}">&#8203;${h(`${m.s1}-${m.s2}`)}</td>`:`<td class="result" style="${cellStyle(bg,ink,true)}"></td>`)+
+        `</tr>`;
+    });
+    body+=`</table>`;
+
+    events.forEach(([,ev])=>{
+      const cat=ev.tournament.category;
+      const c=CATEGORY_COLORS[cat]||CATEGORY_COLORS["7ma"];
+      body+=`<h2 style="background-color:${c.main};color:#ffffff">${h(cat)} · Canchas ${h((ev.tournament.courts||[]).join(", ")||"—")}</h2>`;
+      body+=`<h3>Zonas</h3><table><tr>`+
+        `<th style="${cellStyle(c.soft,c.ink,true)}">Zona</th><th style="${cellStyle(c.soft,c.ink,true)}">Posición</th><th style="${cellStyle(c.soft,c.ink,true)}">Pareja</th></tr>`;
+      ZONES.forEach(z=>(ev.zones?.[z]||[]).forEach((pid,i)=>{
+        body+=`<tr><td style="${cellStyle(c.soft,c.ink)}">${h(z)}</td><td style="${cellStyle(c.soft,c.ink)}">${i+1}</td><td style="${cellStyle(c.soft,c.ink)}">${h(pairNameForEvent(ev,pid))}</td></tr>`;
+      }));
+      body+=`</table>`;
+
+      const addMatches=(title,matches,stageFn)=>{
+        body+=`<h3>${h(title)}</h3><table><tr>`+
+          `<th style="${cellStyle(c.soft,c.ink,true)}">Hora</th><th style="${cellStyle(c.soft,c.ink,true)}">Cancha</th><th style="${cellStyle(c.soft,c.ink,true)}">Etapa</th><th style="${cellStyle(c.soft,c.ink,true)}">Pareja 1</th><th style="${cellStyle(c.soft,c.ink,true)}">Pareja 2</th><th style="${cellStyle(c.soft,c.ink,true)}">Resultado</th></tr>`;
+        sortedMatches(matches).forEach(m=>{
+          body+=`<tr>`+
+            `<td class="time" style="${cellStyle(c.soft,c.ink,true)}">${h(m.time||"")}</td>`+
+            `<td class="court" style="${cellStyle(c.soft,c.ink,true)}">${h(m.court??"")}</td>`+
+            `<td style="${cellStyle(c.soft,c.ink)}">${h(stageFn(m))}</td>`+
+            `<td style="${cellStyle(c.soft,c.ink)}">${h(pairNameForEvent(ev,m.p1))}</td>`+
+            `<td style="${cellStyle(c.soft,c.ink)}">${h(pairNameForEvent(ev,m.p2))}</td>`+
+            (Number.isFinite(m.s1)&&Number.isFinite(m.s2)?`<td class="result" style="${cellStyle(c.soft,c.ink,true)}">&#8203;${h(`${m.s1}-${m.s2}`)}</td>`:`<td class="result" style="${cellStyle(c.soft,c.ink,true)}"></td>`)+
+            `</tr>`;
+        });
+        body+=`</table>`;
+      };
+
+      addMatches("Partidos de zona",ev.zoneMatches,m=>`Zona ${m.zone}`);
+      addMatches("Copa de Oro",ev.brackets?.gold,m=>m.round||"");
+      addMatches("Copa de Plata",ev.brackets?.silver,m=>m.round||"");
+    });
+
+    body+=`</body></html>`;
+    download(`COPAFEM_CRONOGRAMA_${safeName(date||"fecha")}.xls`,"\ufeff"+body,"application/vnd.ms-excel;charset=utf-8");
+    toast("Excel ordenado por horario descargado");
+  }
+'''
+
+          pattern = r'  function exportDropExcel\(\)\{.*?\n  \}\n\n  function exportJSON\(\)'
+          replacement = new_func + '\n  function exportJSON()'
+          new_text, n = re.subn(pattern, replacement, text, count=1, flags=re.S)
+          if n != 1:
+              raise SystemExit(f'No se pudo reemplazar exportDropExcel: {n}')
+          new_text = new_text.replace('name="copafem-app-version" content="2.1.1"','name="copafem-app-version" content="2.1.2"',1)
+          p.write_text(new_text, encoding='utf-8')
+          PY
+
+          if ! git diff --quiet -- index.html; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html
+            git commit -m "Mejorar Excel por horario, colores y resultados"
+            git push
+          fi
+
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
