@@ -25,6 +25,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Aplicar portada profesional COPAFEM
         run: python tools/patch_portada_profesional.py
+      - name: Limpiar cache antigua de la app
+        run: python tools/disable_old_sw.py
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
