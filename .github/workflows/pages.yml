@@ -23,8 +23,8 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
-      - name: Usar portada nueva sin cache
-        run: sed -i 's/portada-copafem.webp/portada-copafem-v2.webp/g' index.html
+      - name: Aplicar portada profesional COPAFEM
+        run: python tools/patch_portada_profesional.py
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
