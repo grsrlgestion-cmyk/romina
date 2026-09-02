@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -23,32 +23,14 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
-
-      - name: Mejorar Excel para canchero
-        run: |
-          sed -i 's/re.subn(pattern, replacement, text, count=1, flags=re.S)/re.subn(pattern, lambda _: replacement, text, count=1, flags=re.S)/' tools/patch_excel_canchero.py
-          python tools/patch_excel_canchero.py
-
-      - name: Guardar mejora en el repositorio
-        run: |
-          if ! git diff --quiet -- index.html; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add index.html
-            git commit -m "Mejorar Excel por horario, colores y resultados"
-            git push
-          fi
-
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
-
       - name: Preparar sitio
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
-
       - name: Publicar
         id: deployment
         uses: actions/deploy-pages@v4
