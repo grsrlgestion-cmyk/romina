@@ -23,10 +23,10 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
-      - name: Aplicar portada profesional V16
-        run: python tools/apply_v16_cover.py
+      - name: Aplicar portada final COPAFEM Americanos
+        run: python tools/apply_final_premium_cover.py
       - name: Renovar cache de la app
-        run: sed -i 's|register("sw.js")|register("sw.js?v=20260902-v16")|g' index.html
+        run: sed -i 's|register("sw.js")|register("sw.js?v=20260903-final")|g' index.html
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
