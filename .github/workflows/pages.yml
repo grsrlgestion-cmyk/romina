@@ -23,12 +23,10 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
-      - name: Aplicar portada final COPAFEM Americanos
+      - name: Aplicar portada con logo real COPAFEM
         run: python tools/apply_final_premium_cover.py
-      - name: Colocar logo real de COPAFEM
-        run: python tools/use_real_logo.py
       - name: Renovar cache de la app
-        run: sed -i 's|register("sw.js")|register("sw.js?v=20260903-logo-real")|g' index.html
+        run: sed -i 's|register("sw.js")|register("sw.js?v=20260903-logo-real-v2")|g' index.html
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
