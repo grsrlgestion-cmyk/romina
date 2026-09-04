@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1672 941" width="1672" height="941" role="img" aria-label="COPAFEM Ingreso">
+  <defs>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#062c58"/>
+      <stop offset="0.58" stop-color="#0b3d70"/>
+      <stop offset="1" stop-color="#15558a"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0a3564" stop-opacity="1"/>
+      <stop offset="0.78" stop-color="#0a3564" stop-opacity="0.86"/>
+      <stop offset="1" stop-color="#0a3564" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#173f75" flood-opacity="0.16"/>
+    </filter>
+    <filter id="sharpen" x="-10%" y="-10%" width="120%" height="120%">
+      <feConvolveMatrix order="3" preserveAlpha="true" kernelMatrix="0 -0.18 0 -0.18 1.72 -0.18 0 -0.18 0"/>
+    </filter>
+    <clipPath id="cardClip"><rect x="190" y="315" width="1230" height="535" rx="42"/></clipPath>
+    <clipPath id="photoClip"><rect x="760" y="315" width="660" height="535" rx="0"/></clipPath>
+    <pattern id="holes" width="48" height="48" patternUnits="userSpaceOnUse">
+      <circle cx="24" cy="24" r="7" fill="#c9d9e8" opacity="0.34"/>
+    </pattern>
+  </defs>
+
+  <rect width="1672" height="941" fill="#ffffff"/>
+
+  <!-- pinceladas suaves -->
+  <g fill="none" stroke="#d7e9f8" opacity="0.72" stroke-linecap="round">
+    <path d="M-80 245 C80 120 245 95 455 68" stroke-width="38"/>
+    <path d="M-95 320 C80 170 250 160 520 92" stroke-width="26" opacity="0.60"/>
+    <path d="M-80 392 C90 240 280 205 505 145" stroke-width="16" opacity="0.45"/>
+    <path d="M80 905 C250 860 395 885 545 920" stroke-width="24" opacity="0.34"/>
+  </g>
+
+  <!-- raqueta marca de agua -->
+  <g opacity="0.38">
+    <circle cx="1530" cy="255" r="200" fill="url(#holes)" stroke="#dfeaf4" stroke-width="16"/>
+    <path d="M1435 410 L1335 640 Q1320 682 1355 698 Q1390 712 1412 670 L1502 437" fill="none" stroke="#e3edf5" stroke-width="36" stroke-linecap="round"/>
+    <path d="M1365 690 L1328 775" stroke="#e3edf5" stroke-width="42" stroke-linecap="round"/>
+  </g>
+
+  <!-- logo vectorial aprobado -->
+  <image href="logo-copafem-aprobado.svg" x="694" y="36" width="284" height="275" preserveAspectRatio="xMidYMid meet"/>
+  <text x="836" y="300" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" letter-spacing="5" fill="#173f75">TORNEOS • ARGENTINA</text>
+
+  <!-- tarjeta principal -->
+  <g filter="url(#cardShadow)">
+    <rect x="190" y="315" width="1230" height="535" rx="42" fill="#0a3564"/>
+  </g>
+
+  <!-- fotografía original, mostrada solo en el lado derecho -->
+  <g clip-path="url(#cardClip)">
+    <image href="portada-copafem.webp" x="0" y="0" width="1672" height="941" preserveAspectRatio="none" filter="url(#sharpen)"/>
+    <rect x="190" y="315" width="640" height="535" fill="url(#navy)"/>
+    <rect x="705" y="315" width="230" height="535" fill="url(#fade)"/>
+  </g>
+
+  <!-- insignia -->
+  <circle cx="282" cy="404" r="44" fill="#fff"/>
+  <circle cx="282" cy="404" r="17" fill="none" stroke="#d4a738" stroke-width="3"/>
+  <path d="M266 393 C276 399 281 408 280 421 M299 388 C287 395 282 402 282 416" fill="none" stroke="#d4a738" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- texto nítido -->
+  <text x="246" y="558" font-family="Georgia,'Times New Roman',serif" font-size="98" font-weight="500" letter-spacing="1" fill="#ffffff">INGRESO</text>
+  <line x1="246" y1="592" x2="468" y2="592" stroke="#d4a738" stroke-width="3"/>
+  <text x="492" y="601" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#d4a738">♡</text>
+  <line x1="516" y1="592" x2="710" y2="592" stroke="#d4a738" stroke-width="3"/>
+
+  <text x="246" y="644" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="400" fill="#ffffff">Consultá tus partidos, horarios,</text>
+  <text x="246" y="680" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="400" fill="#ffffff">resultados y el Drop completo.</text>
+
+  <!-- botón jugador, alineado con el área clickeable actual -->
+  <g>
+    <rect x="264" y="694" width="386" height="96" rx="22" fill="#ffffff"/>
+    <path d="M306 742 H344 M331 727 L347 742 L331 757" fill="none" stroke="#d4a738" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="366" y="756" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="800" fill="#173f75">SOY JUGADOR</text>
+  </g>
+
+  <!-- acceso admin -->
+  <g>
+    <rect x="1403" y="646" width="150" height="150" rx="26" fill="#ffffff" filter="url(#cardShadow)"/>
+    <text x="1478" y="712" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="52" fill="#173f75">⚙</text>
+    <text x="1478" y="752" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="800" fill="#173f75">ACCESO</text>
+    <text x="1478" y="777" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="800" fill="#173f75">ADMIN</text>
+  </g>
+</svg>
