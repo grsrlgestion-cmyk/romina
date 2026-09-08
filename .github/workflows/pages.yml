@@ -23,9 +23,8 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
-      - name: Activar portada COPAFEM HQ
-        run: |
-          sed -i 's|src="portada-copafem.webp"|src="portada-copafem-hq.svg?v=20260904-hq"|g' index.html
+      - name: Aplicar portada COPAFEM completa
+        run: python tools/apply_cover_complete.py
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
