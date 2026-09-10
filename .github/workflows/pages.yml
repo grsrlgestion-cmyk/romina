@@ -25,6 +25,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Aplicar portada COPAFEM completa
         run: python tools/apply_cover_complete.py
+      - name: Habilitar torneos de 6 a 24 parejas
+        run: python tools/patch_dynamic_pairs.py
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
