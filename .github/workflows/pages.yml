@@ -29,6 +29,8 @@ jobs:
         run: python tools/patch_dynamic_pairs.py
       - name: Mostrar horario y cancha en el Drop
         run: python tools/patch_drop_schedule.py
+      - name: Agrandar el Drop para impresión
+        run: python tools/patch_print_drop_large.py
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
