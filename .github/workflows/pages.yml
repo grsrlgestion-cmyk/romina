@@ -29,6 +29,8 @@ jobs:
         run: python tools/patch_cover_user_logo.py
       - name: Habilitar torneos de 6 a 24 parejas
         run: python tools/patch_dynamic_pairs.py
+      - name: Desempatar zonas por games
+        run: python tools/patch_zone_tiebreak_games.py
       - name: Asignar canchas sin superposición
         run: python tools/patch_court_allocator.py
       - name: Agregar canchas extra por horario
