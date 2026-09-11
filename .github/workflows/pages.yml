@@ -35,6 +35,8 @@ jobs:
         run: python tools/patch_print_drop_large.py
       - name: Imprimir solo zonas y cruces reales
         run: python tools/patch_print_real_only.py
+      - name: Abrir Drop completo al 100%
+        run: python tools/patch_drop_default_100.py
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
