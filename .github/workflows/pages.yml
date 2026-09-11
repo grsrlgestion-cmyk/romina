@@ -27,6 +27,8 @@ jobs:
         run: python tools/apply_cover_complete.py
       - name: Habilitar torneos de 6 a 24 parejas
         run: python tools/patch_dynamic_pairs.py
+      - name: Mostrar horario y cancha en el Drop
+        run: python tools/patch_drop_schedule.py
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
