@@ -43,6 +43,8 @@ jobs:
         run: python tools/patch_drop_default_100.py
       - name: Mostrar zona, número y nombres completos
         run: python tools/patch_drop_zone_full_names.py
+      - name: Imprimir una zona por hoja en Resultados
+        run: python tools/patch_print_results_one_zone.py
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
