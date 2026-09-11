@@ -62,11 +62,13 @@ injection = r'''
     return'';
   }
 
+  function slotText(slot){return slot.time+' · Cancha '+slot.court;}
+
   function placeholder(slot){
     const el=document.createElement('div');
     el.className='drop-match';
     el.dataset.copafemPlanned='1';
-    el.innerHTML='<div class="drop-match-head copafem-drop-schedule"><span>'+slot.time+' · Cancha '+slot.court+'</span></div>'+
+    el.innerHTML='<div class="drop-match-head copafem-drop-schedule"><span>'+slotText(slot)+'</span></div>'+
       '<div class="drop-match-team"><span>A definir</span><b>—</b></div>'+
       '<div class="drop-match-team"><span>A definir</span><b>—</b></div>';
     return el;
@@ -85,9 +87,16 @@ injection = r'''
     raw=raw.replace(/\s*·\s*C(?:ancha\s*)?/i,' · Cancha ');
     const hasTime=/\b\d{1,2}:\d{2}\b/.test(raw);
     const hasCourt=/Cancha\s*\d+/i.test(raw);
-    const value=(hasTime&&hasCourt)?raw:(slot?slot.time+' · Cancha '+slot.court:raw||'Horario a definir · Cancha —');
+    const value=(hasTime&&hasCourt)?raw:(slot?slotText(slot):raw||'Horario a definir · Cancha —');
     head.classList.add('copafem-drop-schedule');
-    head.innerHTML='<span>'+value+'</span>';
+    if(head.children.length!==1 || head.firstElementChild?.tagName!=='SPAN' || head.textContent.trim()!==value){
+      head.innerHTML='<span>'+value+'</span>';
+    }
+  }
+
+  function plannedMatchesOK(matches,slots){
+    if(matches.length!==slots.length)return false;
+    return matches.every((m,i)=>m.dataset.copafemPlanned==='1' && m.querySelector('.copafem-drop-schedule')?.textContent.trim()===slotText(slots[i]));
   }
 
   function decorate(){
@@ -106,30 +115,33 @@ injection = r'''
         if(real.length){
           matches.filter(m=>m.dataset.copafemPlanned).forEach(m=>m.remove());
           real.forEach((m,i)=>normalizeExistingHeader(m,slots[i]));
-          col.style.display='';
+          if(col.style.display==='none')col.style.display='';
           return;
         }
 
         const generic=matches.length===1 && !matches[0].querySelector('.drop-match-head');
-        if(generic || matches.every(m=>m.dataset.copafemPlanned)){
-          matches.forEach(m=>m.remove());
+        const allPlanned=matches.length>0 && matches.every(m=>m.dataset.copafemPlanned==='1');
+        if(generic || allPlanned || !matches.length){
           if(slots.length){
-            slots.forEach(slot=>col.appendChild(placeholder(slot)));
-            col.style.display='';
+            if(!plannedMatchesOK(matches,slots)){
+              matches.forEach(m=>m.remove());
+              slots.forEach(slot=>col.appendChild(placeholder(slot)));
+            }
+            if(col.style.display==='none')col.style.display='';
           }else if(cup==='silver'&&round==='octavos'){
-            col.style.display='none';
-          }else{
-            col.style.display='';
+            if(col.style.display!=='none')col.style.display='none';
           }
-        }else{
-          matches.forEach((m,i)=>normalizeExistingHeader(m,slots[i]));
+          return;
         }
+
+        matches.forEach((m,i)=>normalizeExistingHeader(m,slots[i]));
       });
 
       const silver=sheet.querySelector('.drop-silver-area');
       if(silver){
         const visible=[...silver.querySelectorAll(':scope > .drop-round-col')].filter(x=>x.style.display!=='none').length;
-        if(visible>0)silver.style.gridTemplateColumns='repeat('+visible+',minmax(0,1fr))';
+        const wanted=visible>0?'repeat('+visible+',minmax(0,1fr))':'';
+        if(wanted && silver.style.gridTemplateColumns!==wanted)silver.style.gridTemplateColumns=wanted;
       }
     });
   }
