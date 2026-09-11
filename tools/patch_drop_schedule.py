@@ -24,7 +24,6 @@ injection = r'''
 </style>
 <script>
 (() => {
-  const MARK='COPAFEM_DROP_SCHEDULE_V1';
   const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
   function sheetCourts(sheet){
@@ -151,6 +150,7 @@ injection = r'''
 if '</body>' not in s:
     raise SystemExit('No se encontró </body> en index.html')
 
-s = s.replace('</body>', injection + '\n</body>', 1)
+head, tail = s.rsplit('</body>', 1)
+s = head + injection + '\n</body>' + tail
 p.write_text(s, encoding='utf-8')
 print('COPAFEM drop schedule patch OK')
