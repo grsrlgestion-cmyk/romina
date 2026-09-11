@@ -33,6 +33,8 @@ jobs:
         run: python tools/patch_zone_tiebreak_games.py
       - name: Actualizar GF GC DG en vivo
         run: python tools/patch_live_zone_games.py
+      - name: Mostrar cruces futuros de Oro y Plata
+        run: python tools/patch_visible_future_cup_matches.py
       - name: Asignar canchas sin superposición
         run: python tools/patch_court_allocator.py
       - name: Agregar canchas extra por horario
