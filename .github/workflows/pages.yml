@@ -29,6 +29,8 @@ jobs:
         run: python tools/patch_dynamic_pairs.py
       - name: Asignar canchas sin superposición
         run: python tools/patch_court_allocator.py
+      - name: Agregar canchas extra por horario
+        run: python tools/patch_extra_courts_by_time.py
       - name: Mostrar solo zonas y cruces reales con horario/cancha
         run: python tools/patch_drop_schedule.py
       - name: Agrandar el Drop para impresión
