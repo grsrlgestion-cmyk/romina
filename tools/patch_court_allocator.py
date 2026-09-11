@@ -3,14 +3,15 @@ from pathlib import Path
 p = Path('index.html')
 s = p.read_text(encoding='utf-8')
 
-MARKER = 'COPAFEM_COURT_ALLOCATOR_V2'
+MARKER = 'COPAFEM_COURT_ALLOCATOR_V3'
 if MARKER in s:
-    print('court allocator v2 already applied')
+    print('court allocator v3 already applied')
     raise SystemExit
 
 helpers = r'''
-  // COPAFEM_COURT_ALLOCATOR_V2
+  // COPAFEM_COURT_ALLOCATOR_V3
   // Compacta los partidos para no dejar canchas libres mientras exista un partido compatible por jugar.
+  // Funciona también cuando la fecha todavía está vacía ("Sin fecha").
   function copafemUniqueCourts(event){
     return [...new Set((event?.tournament?.courts||[]).map(Number).filter(n=>Number.isFinite(n)&&n>0))];
   }
@@ -64,21 +65,22 @@ helpers = r'''
     if(limit<=0 || !pending.length) return [];
     const selected=[];
     const usedPlayers=new Set();
-
-    // Primera pasada: reparte entre zonas para que todas avancen y llena canchas.
     const ordered=[...pending].sort(copafemZoneSort);
     const usedZones=new Set();
+
+    // Primero reparte entre zonas y usa todas las canchas libres posibles.
     for(const m of ordered){
       if(selected.length>=limit) break;
       if(usedZones.has(m.zone)) continue;
       const p1=String(m.p1||''), p2=String(m.p2||'');
       if((p1&&usedPlayers.has(p1)) || (p2&&usedPlayers.has(p2))) continue;
-      selected.push(m); usedZones.add(m.zone);
-      if(p1) usedPlayers.add(p1); if(p2) usedPlayers.add(p2);
+      selected.push(m);
+      usedZones.add(m.zone);
+      if(p1) usedPlayers.add(p1);
+      if(p2) usedPlayers.add(p2);
     }
 
-    // Segunda pasada: si quedan canchas libres, permite un segundo partido de una zona
-    // solo cuando las parejas no se repiten (útil en zonas de 4).
+    // Si todavía quedan canchas libres, agrega cualquier otro partido compatible.
     if(selected.length<limit){
       for(const m of ordered){
         if(selected.length>=limit) break;
@@ -86,7 +88,8 @@ helpers = r'''
         const p1=String(m.p1||''), p2=String(m.p2||'');
         if((p1&&usedPlayers.has(p1)) || (p2&&usedPlayers.has(p2))) continue;
         selected.push(m);
-        if(p1) usedPlayers.add(p1); if(p2) usedPlayers.add(p2);
+        if(p1) usedPlayers.add(p1);
+        if(p2) usedPlayers.add(p2);
       }
     }
     return selected;
@@ -120,8 +123,6 @@ helpers = r'''
         if(pos>=0) pending.splice(pos,1);
         latestEnd=Math.max(latestEnd,t+dur);
       });
-
-      // No pasa de horario hasta haber agotado todas las canchas utilizables de este turno.
       cursor=t;
     }
     return latestEnd;
@@ -161,7 +162,8 @@ helpers = r'''
       for(const court of freeCourts){
         if(!pending.length) break;
         const m=pending.shift();
-        m.time=fmtTime(t); m.court=court;
+        m.time=fmtTime(t);
+        m.court=court;
         copafemReserve(occupied,court,t,dur,eventId,m);
         latestEnd=Math.max(latestEnd,t+dur);
       }
@@ -171,12 +173,15 @@ helpers = r'''
   }
 
   function copafemScheduleDateNoConflicts(){
-    const date=state?.tournament?.date;
-    if(!date) return false;
-    const entries=eventsOnDate(date).filter(([,e])=>e && (e.zoneMatches||[]).length);
+    // Una fecha vacía también es válida: agrupa todos los eventos "Sin fecha".
+    const date=String(state?.tournament?.date||'');
+    let entries=eventsOnDate(date).filter(([,e])=>e && (e.zoneMatches||[]).length);
+    // Respaldo: si por alguna razón no aparece en eventsOnDate, programa al menos el evento activo.
+    if(!entries.length && state && (state.zoneMatches||[]).length){
+      entries=[[store.activeEventId||'active',state]];
+    }
     if(!entries.length) return false;
 
-    // Recalcula completa la fecha para que ningún horario viejo reserve una cancha innecesariamente.
     entries.forEach(([,e])=>{
       (e.zoneMatches||[]).forEach(m=>{m.time=null;m.court=null;});
       (e.brackets?.gold||[]).forEach(m=>{m.time=null;m.court=null;});
@@ -186,16 +191,15 @@ helpers = r'''
     const occupied=new Map();
     const zoneEnds=new Map();
 
-    // Primero compacta todas las zonas. Cada categoría usa todas sus canchas posibles.
     const zoneOrder=[...entries].sort((a,b)=>
       parseTime(a[1].tournament.startTime||'10:00')-parseTime(b[1].tournament.startTime||'10:00') ||
       CATEGORIES.indexOf(a[1].tournament.category)-CATEGORIES.indexOf(b[1].tournament.category)
     );
+
     zoneOrder.forEach(([id,e])=>{
       zoneEnds.set(id,copafemScheduleZonesEvent(e,id,occupied));
     });
 
-    // Después programa las copas, respetando que cada categoría termine primero sus zonas.
     const queues=entries.map(([id,e])=>({
       id,event:e,batches:copafemBracketBatches(e),index:0,
       readyAt:zoneEnds.get(id)??parseTime(e.tournament.startTime||'10:00'),
@@ -219,13 +223,13 @@ s = s.replace(marker, helpers + '\n' + marker, 1)
 
 s = s.replace(
     '  function generateSchedule(requireZones=true){\n    if(dynMode()) return generateScheduleDynamic();',
-    '  function generateSchedule(requireZones=true){\n    if(requireZones && !state.zoneMatches.length) return toast("Primero generá las zonas");\n    return copafemScheduleDateNoConflicts();\n    if(dynMode()) return generateScheduleDynamic();',
+    '  function generateSchedule(requireZones=true){\n    if(requireZones && !state.zoneMatches.length) return toast("Primero generá las zonas");\n    const ok=copafemScheduleDateNoConflicts();\n    if(ok){ saveState(); renderAll(); }\n    return ok;\n    if(dynMode()) return generateScheduleDynamic();',
     1
 )
 
 s = s.replace(
     '  function generateScheduleDynamic(){\n    if(!state.zoneMatches.length)return;',
-    '  function generateScheduleDynamic(){\n    if(!state.zoneMatches.length)return;\n    return copafemScheduleDateNoConflicts();',
+    '  function generateScheduleDynamic(){\n    if(!state.zoneMatches.length)return;\n    const ok=copafemScheduleDateNoConflicts();\n    if(ok){ saveState(); renderAll(); }\n    return ok;',
     1
 )
 
@@ -236,4 +240,4 @@ s = s.replace(
 )
 
 p.write_text(s,encoding='utf-8')
-print('COPAFEM court allocator v2 patch OK')
+print('COPAFEM court allocator v3 patch OK')
