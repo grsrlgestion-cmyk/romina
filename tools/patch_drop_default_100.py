@@ -10,5 +10,9 @@ s = s.replace('id="dropZoomLabel" class="drop-zoom-label">85%</span>', 'id="drop
 # Hay dos declaraciones CSS equivalentes en la base; ambas deben arrancar en 100%.
 s = s.replace('--drop-scale:.85', '--drop-scale:1')
 
+# No ejecutar "Ver completo" automáticamente al entrar al Drop.
+# El usuario puede seguir usando ese botón manualmente.
+s = s.replace('if(name==="drop") setTimeout(fitDrop,60);', 'if(name==="drop") setTimeout(()=>setDropZoom(1),60);', 1)
+
 p.write_text(s, encoding='utf-8')
-print('COPAFEM Drop default zoom = 100%')
+print('COPAFEM Drop abre al 100% sin auto-fit')
