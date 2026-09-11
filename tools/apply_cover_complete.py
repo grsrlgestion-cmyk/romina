@@ -3,279 +3,308 @@ from pathlib import Path
 path = Path("index.html")
 text = path.read_text(encoding="utf-8")
 
-new_css = """/* ===== PORTADA COPAFEM ===== */
+new_css = r'''/* ===== PORTADA COPAFEM PROFESIONAL ===== */
 .cover-gateway{
-  min-height:100vh;
-  background:
-    radial-gradient(circle at top right, rgba(210,226,242,.72) 0 19%, transparent 19% 100%),
-    linear-gradient(180deg,#fbfdff 0%,#f4f8fd 100%);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:24px;
-  overflow:hidden;
+  --cover-navy:#123d72;
+  --cover-navy-2:#0b2f5c;
+  --cover-blue:#dceafb;
+  --cover-gold:#c89c3f;
+  min-height:100svh;
   position:relative;
+  display:grid;
+  place-items:center;
+  padding:clamp(18px,3vw,42px);
+  overflow:auto;
+  background:
+    radial-gradient(circle at 13% 8%,rgba(182,211,242,.55),transparent 30%),
+    radial-gradient(circle at 88% 14%,rgba(218,232,247,.9),transparent 27%),
+    linear-gradient(145deg,#fdfefe 0%,#f2f7fd 55%,#e9f2fb 100%);
 }
 .cover-gateway::before{
   content:"";
-  position:absolute;
-  left:-120px;
-  top:120px;
-  width:540px;
-  height:220px;
-  background:linear-gradient(135deg,rgba(198,220,242,.65),rgba(198,220,242,0));
-  transform:rotate(-16deg);
-  border-radius:48px;
+  position:fixed;
+  inset:auto -10vw -30vh auto;
+  width:58vw;
+  height:58vw;
+  border:2px solid rgba(18,61,114,.08);
+  border-radius:50%;
+  box-shadow:0 0 0 58px rgba(255,255,255,.22),0 0 0 120px rgba(18,61,114,.025);
   pointer-events:none;
 }
 .cover-gateway::after{
   content:"";
-  position:absolute;
-  right:-120px;
-  top:80px;
-  width:420px;
-  height:420px;
-  border-radius:50%;
-  border:16px solid rgba(214,226,239,.62);
-  opacity:.58;
+  position:fixed;
+  left:-8vw;
+  top:17vh;
+  width:40vw;
+  height:17vw;
+  background:linear-gradient(135deg,rgba(157,195,234,.28),rgba(255,255,255,0));
+  border-radius:44px;
+  transform:rotate(-14deg);
   pointer-events:none;
 }
 .cover-stage{
-  width:min(100%,1380px);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:22px;
-  position:relative;
-  z-index:1;
-}
-.cover-brand{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:7px;
-  text-align:center;
-}
-.cover-logo{
-  width:min(300px,60vw);
-  max-width:100%;
-  height:auto;
-  display:block;
-  filter:drop-shadow(0 8px 18px rgba(23,63,117,.08));
-}
-.cover-brand-text{
-  font-size:clamp(17px,1.8vw,24px);
-  font-weight:800;
-  letter-spacing:.19em;
-  color:#173f75;
-}
-.cover-card{
-  width:min(100%,1320px);
-  min-height:520px;
-  border-radius:34px;
-  background:#fff;
-  box-shadow:0 22px 58px rgba(23,63,117,.14);
-  border:1px solid #dce8f3;
-  display:grid;
-  grid-template-columns:minmax(390px,535px) 1fr;
-  overflow:hidden;
-  position:relative;
-}
-.cover-copy{
-  background:linear-gradient(180deg,#0a3569 0%,#0e477f 100%);
-  color:#fff;
-  padding:46px 52px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
+  width:min(1180px,100%);
   position:relative;
   z-index:2;
 }
-.cover-ball{
-  width:82px;
-  height:82px;
-  border-radius:50%;
-  background:#fff;
+.cover-shell{
   display:grid;
-  place-items:center;
-  margin-bottom:24px;
-  box-shadow:0 8px 18px rgba(3,24,48,.12),inset 0 0 0 1px rgba(212,167,56,.2);
+  grid-template-columns:minmax(390px,.9fr) minmax(420px,1.1fr);
+  min-height:min(720px,calc(100svh - 70px));
+  border:1px solid rgba(18,61,114,.10);
+  border-radius:36px;
+  overflow:hidden;
+  background:rgba(255,255,255,.93);
+  box-shadow:0 34px 90px rgba(22,58,99,.16);
+  backdrop-filter:blur(18px);
 }
-.cover-ball::before{
-  content:"◔";
-  color:#d4a738;
-  font-size:38px;
-  line-height:1;
-  transform:rotate(-14deg);
+.cover-main{
+  padding:clamp(34px,5vw,64px);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(248,251,255,.98));
 }
-.cover-copy h1{
+.cover-logo-wrap{
+  display:flex;
+  justify-content:center;
+  margin-bottom:22px;
+}
+.cover-logo{
+  width:min(300px,76%);
+  height:auto;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 12px 24px rgba(18,61,114,.10));
+}
+.cover-kicker{
+  text-align:center;
+  color:var(--cover-gold);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  margin-bottom:11px;
+}
+.cover-title{
   margin:0;
+  color:var(--cover-navy-2);
+  text-align:center;
   font-family:Georgia,"Times New Roman",serif;
-  font-size:clamp(68px,6.4vw,102px);
-  line-height:.96;
-  letter-spacing:.01em;
-  text-shadow:0 2px 2px rgba(0,0,0,.04);
+  font-size:clamp(44px,5vw,70px);
+  line-height:1;
+  letter-spacing:.08em;
 }
-.cover-sep{
+.cover-rule{
   display:flex;
   align-items:center;
-  gap:16px;
-  margin:26px 0 22px;
+  gap:12px;
+  margin:19px auto 18px;
+  width:min(330px,82%);
 }
-.cover-sep::before,.cover-sep::after{
-  content:"";
-  flex:1;
-  height:3px;
-  background:#d4a738;
-  border-radius:999px;
+.cover-rule::before,.cover-rule::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--cover-gold))}
+.cover-rule::after{background:linear-gradient(90deg,var(--cover-gold),transparent)}
+.cover-rule span{color:var(--cover-gold);font-size:20px}
+.cover-subtitle{
+  margin:0 auto 28px;
+  max-width:430px;
+  text-align:center;
+  color:#60738b;
+  font-size:15px;
+  line-height:1.65;
 }
-.cover-sep span{
-  color:#d4a738;
-  font-size:28px;
-  line-height:1;
-}
-.cover-copy p{
-  margin:0 0 30px;
-  font-size:clamp(20px,1.75vw,26px);
-  line-height:1.42;
-  max-width:420px;
-}
-.cover-primary{
-  align-self:flex-start;
+.cover-actions{display:grid;gap:12px}
+.cover-player-btn{
+  width:100%;
   border:0;
-  background:#fff;
-  color:#173f75;
-  border-radius:22px;
-  padding:20px 34px;
-  font-size:clamp(23px,2.1vw,30px);
+  border-radius:18px;
+  min-height:62px;
+  padding:16px 20px;
+  background:linear-gradient(135deg,var(--cover-navy),#1d558f);
+  color:#fff;
   font-weight:900;
-  display:inline-flex;
-  align-items:center;
-  gap:14px;
-  box-shadow:0 10px 24px rgba(7,28,58,.2);
+  font-size:18px;
+  letter-spacing:.03em;
   cursor:pointer;
+  box-shadow:0 14px 30px rgba(18,61,114,.22);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  transition:.2s ease;
+}
+.cover-player-btn:hover{transform:translateY(-2px);box-shadow:0 18px 36px rgba(18,61,114,.27)}
+.cover-player-btn .arrow{font-size:25px;color:#f4d98f;line-height:1}
+.cover-player-note{text-align:center;color:#718196;font-size:12px;margin-top:2px}
+.cover-admin-btn{
+  margin-top:8px;
+  min-height:52px;
+  border:1px solid #d7e3ef;
+  border-radius:16px;
+  background:#fff;
+  color:var(--cover-navy);
+  font-weight:850;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
   transition:.18s ease;
 }
-.cover-primary:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(7,28,58,.24)}
-.cover-primary::before{
-  content:"→";
-  color:#d4a738;
-  font-size:1.35em;
-  line-height:1;
+.cover-admin-btn:hover{background:#f5f9fd;border-color:#c4d7ea}
+.cover-footnote{
+  margin-top:24px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  align-items:center;
+  color:#7c8b9d;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.16em;
+  text-transform:uppercase;
 }
+.cover-footnote i{width:4px;height:4px;border-radius:50%;background:var(--cover-gold)}
 .cover-visual{
   position:relative;
-  min-height:520px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 66% 26%,rgba(255,255,255,.36),transparent 18%),
+    linear-gradient(145deg,#0c386a 0%,#164f87 48%,#8bb6dc 100%);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:clamp(34px,4vw,54px);
+  color:#fff;
+}
+.cover-visual::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity:.50;
   background-image:
-    linear-gradient(90deg,rgba(9,53,101,.7) 0%,rgba(9,53,101,.24) 26%,rgba(9,53,101,.06) 48%,rgba(9,53,101,0) 70%),
-    url('portada-copafem.webp');
-  background-size:auto 100%;
-  background-repeat:no-repeat;
-  background-position:86% center;
-  background-color:#0b3d70;
-  filter:saturate(1.04) contrast(1.02);
+    linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px);
+  background-size:86px 86px;
+  transform:perspective(720px) rotateX(59deg) scale(1.45) translateY(12%);
+  transform-origin:center bottom;
 }
 .cover-visual::after{
   content:"";
   position:absolute;
-  inset:0;
-  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,20,44,.08));
-  pointer-events:none;
+  width:390px;
+  height:390px;
+  right:-120px;
+  bottom:-100px;
+  border:2px solid rgba(255,255,255,.18);
+  border-radius:50%;
+  box-shadow:0 0 0 55px rgba(255,255,255,.035),0 0 0 110px rgba(255,255,255,.025);
 }
-.cover-admin{
-  position:absolute;
-  right:24px;
-  bottom:24px;
-  width:132px;
-  min-height:142px;
-  border:0;
-  border-radius:22px;
-  background:rgba(255,255,255,.96);
-  color:#173f75;
-  box-shadow:0 14px 34px rgba(23,63,117,.18);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  font-weight:900;
-  cursor:pointer;
-  z-index:3;
+.cover-visual-top,.cover-visual-center,.cover-visual-bottom{position:relative;z-index:2}
+.cover-visual-top{display:flex;justify-content:flex-end;gap:12px;font-size:11px;font-weight:850;letter-spacing:.18em;text-transform:uppercase;color:#eaf4ff}
+.cover-visual-top span+span::before{content:"•";color:#e9bf60;margin-right:12px}
+.cover-visual-center{max-width:480px}
+.cover-visual-center .small{font-size:12px;font-weight:900;letter-spacing:.24em;text-transform:uppercase;color:#c9ddf2}
+.cover-visual-center h2{margin:12px 0 14px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(42px,5vw,72px);line-height:1.02;letter-spacing:-.02em}
+.cover-visual-center p{margin:0;max-width:420px;color:#e3eef9;font-size:16px;line-height:1.7}
+.cover-court-card{
+  margin-top:30px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1px;
+  border:1px solid rgba(255,255,255,.20);
+  border-radius:18px;
+  overflow:hidden;
+  background:rgba(255,255,255,.16);
   backdrop-filter:blur(8px);
-  transition:.18s ease;
 }
-.cover-admin:hover{transform:translateY(-2px)}
-.cover-admin .gear{font-size:40px;line-height:1}
-.cover-admin span{display:block}
-.cover-admin .cover-admin-txt{font-size:16px;letter-spacing:.02em}
+.cover-court-card div{padding:17px 13px;background:rgba(5,35,67,.18);text-align:center}
+.cover-court-card strong{display:block;font-size:19px;color:#fff}.cover-court-card span{display:block;margin-top:4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#cfe1f2}
+.cover-visual-bottom{font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:850;color:#dceaf7}
+.cover-visual-bottom b{color:#efc96f;font-weight:900}
 .cover-login{
   position:fixed!important;
-  z-index:100!important;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
+  z-index:120!important;
+  left:50%;top:50%;transform:translate(-50%,-50%);
   width:min(460px,calc(100vw - 28px));
   margin:0!important;
-  box-shadow:0 22px 70px rgba(13,43,78,.28)!important;
+  box-shadow:0 28px 80px rgba(13,43,78,.32)!important;
+  border:1px solid #d9e5f0!important;
 }
-@media(max-width:1050px){
-  .cover-gateway{align-items:flex-start;padding-top:18px;overflow:auto}
-  .cover-card{grid-template-columns:1fr;max-width:780px;min-height:auto}
-  .cover-copy{padding:36px 30px 30px}
-  .cover-copy p{max-width:none}
-  .cover-visual{min-height:360px;background-size:cover;background-position:center center}
-  .cover-admin{right:20px;bottom:20px;width:122px;min-height:130px}
+@media(max-width:900px){
+  .cover-gateway{place-items:start center;padding:14px}
+  .cover-shell{grid-template-columns:1fr;min-height:auto;max-width:690px}
+  .cover-main{padding:34px 26px}
+  .cover-logo{width:min(250px,66vw)}
+  .cover-visual{min-height:350px;padding:30px}
+  .cover-visual-center h2{font-size:44px}
 }
-@media(max-width:700px){
-  .cover-gateway{padding:12px 10px 20px;min-height:auto}
-  .cover-stage{gap:16px}
-  .cover-logo{width:min(235px,66vw)}
-  .cover-brand-text{font-size:14px;letter-spacing:.15em}
-  .cover-card{border-radius:24px}
-  .cover-copy{padding:26px 20px 24px}
-  .cover-ball{width:62px;height:62px;margin-bottom:18px}
-  .cover-ball::before{font-size:30px}
-  .cover-copy h1{font-size:62px}
-  .cover-sep{margin:18px 0}
-  .cover-copy p{font-size:18px;margin-bottom:22px}
-  .cover-primary{width:100%;justify-content:center;padding:17px 18px;font-size:20px;border-radius:17px}
-  .cover-visual{min-height:245px;background-size:cover;background-position:72% center}
-  .cover-admin{position:static;width:calc(100% - 24px);min-height:auto;padding:14px 12px;border-radius:17px;flex-direction:row;gap:10px;margin:12px;justify-content:center}
-  .cover-admin .gear{font-size:28px}
-  .cover-admin .cover-admin-txt{font-size:15px}
+@media(max-width:560px){
+  .cover-gateway{padding:0;background:#f5f9fd}
+  .cover-shell{border-radius:0;border:0;box-shadow:none;min-height:100svh;width:100%}
+  .cover-main{padding:28px 20px 24px}
+  .cover-logo{width:min(220px,72vw)}
+  .cover-title{font-size:42px}
+  .cover-subtitle{font-size:14px;margin-bottom:22px}
+  .cover-player-btn{min-height:58px;font-size:17px}
+  .cover-visual{min-height:290px;padding:26px 22px}
+  .cover-visual-top{justify-content:flex-start}
+  .cover-visual-center h2{font-size:38px;margin-top:8px}
+  .cover-visual-center p{font-size:14px}
+  .cover-court-card div{padding:13px 7px}.cover-court-card strong{font-size:16px}.cover-court-card span{font-size:8px}
 }
-"""
+'''
 
-new_html = """  <section id=\"roleGateway\" class=\"cover-gateway\">
-    <div class=\"cover-stage\">
-      <div class=\"cover-brand\">
-        <img class=\"cover-logo\" src=\"logo-copafem-aprobado.svg?v=20260908\" alt=\"COPAFEM\">
-        <div class=\"cover-brand-text\">TORNEOS • ARGENTINA</div>
-      </div>
-      <div class=\"cover-card\">
-        <div class=\"cover-copy\">
-          <div class=\"cover-ball\" aria-hidden=\"true\"></div>
-          <h1>INGRESO</h1>
-          <div class=\"cover-sep\" aria-hidden=\"true\"><span>♡</span></div>
-          <p>Consultá tus partidos, horarios, resultados y el Drop completo.</p>
-          <button id=\"choosePlayer\" class=\"cover-primary\" type=\"button\" aria-label=\"Soy jugador\">SOY JUGADOR</button>
+new_html = r'''  <section id="roleGateway" class="cover-gateway">
+    <div class="cover-stage">
+      <div class="cover-shell">
+        <div class="cover-main">
+          <div class="cover-logo-wrap">
+            <img class="cover-logo" src="logo-copafem-real.png?v=20260911" alt="COPAFEM · Argentina">
+          </div>
+          <div class="cover-kicker">San Juan · Argentina</div>
+          <h1 class="cover-title">INGRESO</h1>
+          <div class="cover-rule" aria-hidden="true"><span>♡</span></div>
+          <p class="cover-subtitle">Ingresá a COPAFEM para consultar tus horarios, resultados, zonas y el Drop completo del torneo.</p>
+          <div class="cover-actions">
+            <button id="choosePlayer" class="cover-player-btn" type="button" aria-label="Ingresar como jugador">
+              <span>INGRESAR COMO JUGADOR</span><span class="arrow">→</span>
+            </button>
+            <div class="cover-player-note">Acceso directo · no requiere registro previo</div>
+            <button id="chooseAdmin" class="cover-admin-btn" type="button" aria-label="Acceso administrador">
+              <span aria-hidden="true">⚙</span><span>Acceso administrador</span>
+            </button>
+          </div>
+          <div class="cover-footnote"><span>Torneos</span><i></i><span>Comunidad</span><i></i><span>Pádel</span></div>
         </div>
-        <div class=\"cover-visual\" aria-hidden=\"true\"></div>
-        <button id=\"chooseAdmin\" class=\"cover-admin\" type=\"button\" aria-label=\"Administrador\">
-          <span class=\"gear\">⚙</span>
-          <span class=\"cover-admin-txt\">ACCESO<br>ADMIN</span>
-        </button>
+        <aside class="cover-visual" aria-hidden="true">
+          <div class="cover-visual-top"><span>COPAFEM</span><span>2026</span></div>
+          <div class="cover-visual-center">
+            <div class="small">Más que un torneo</div>
+            <h2>El pádel<br>también nos une.</h2>
+            <p>Una experiencia simple y clara para seguir cada fecha, cada partido y cada cruce.</p>
+            <div class="cover-court-card">
+              <div><strong>ZONAS</strong><span>Clasificación</span></div>
+              <div><strong>ORO</strong><span>Competencia</span></div>
+              <div><strong>PLATA</strong><span>Comunidad</span></div>
+            </div>
+          </div>
+          <div class="cover-visual-bottom"><b>NO PUEDO, TENGO PÁDEL</b> · ARGENTINA</div>
+        </aside>
       </div>
     </div>
-    <div id=\"adminLogin\" class=\"login-card cover-login\" hidden>
+    <div id="adminLogin" class="login-card cover-login" hidden>
       <h2>Acceso administrador</h2><p>Ingresá la contraseña para abrir el panel de organización.</p>
-      <form id=\"adminLoginForm\"><label>Contraseña<input id=\"adminPassword\" type=\"password\" autocomplete=\"current-password\" required placeholder=\"Contraseña de administrador\"></label><div class=\"login-actions\"><button class=\"btn primary\" type=\"submit\">Ingresar</button><button id=\"cancelAdminLogin\" class=\"btn\" type=\"button\">Volver</button></div><div id=\"adminLoginError\" class=\"login-error\" aria-live=\"polite\"></div></form>
+      <form id="adminLoginForm"><label>Contraseña<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Contraseña de administrador"></label><div class="login-actions"><button class="btn primary" type="submit">Ingresar</button><button id="cancelAdminLogin" class="btn" type="button">Volver</button></div><div id="adminLoginError" class="login-error" aria-live="polite"></div></form>
     </div>
   </section>
-"""
+'''
 
-css_start = text.index("/* ===== PORTADA COPAFEM ===== */")
+css_marker = "/* ===== PORTADA COPAFEM ===== */"
+if css_marker not in text:
+    css_marker = "/* ===== PORTADA COPAFEM PROFESIONAL ===== */"
+css_start = text.index(css_marker)
 style_close = text.index("</style>", css_start)
 text = text[:css_start] + new_css + "\n\n  " + text[style_close:]
 
@@ -284,4 +313,4 @@ player_start = text.index('  <section id="playerApp" hidden>', html_start)
 text = text[:html_start] + new_html + "\n" + text[player_start:]
 
 path.write_text(text, encoding="utf-8")
-print("Portada COPAFEM completa aplicada")
+print("Portada profesional COPAFEM con logo real aplicada")
