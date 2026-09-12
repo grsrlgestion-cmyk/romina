@@ -68,3 +68,5 @@ jobs:
       - name: Publicar
         id: deployment
         uses: actions/deploy-pages@v4
+
+# Publicación forzada para activar el selector de los 3 formatos de Drop.
