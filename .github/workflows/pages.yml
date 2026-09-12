@@ -91,6 +91,8 @@ jobs:
         run: python tools/patch_print_cups_five_pages.py
       - name: Imprimir Oro Plata en A4 vertical
         run: python tools/patch_print_cups_portrait.py
+      - name: Publicar torneo manualmente para jugadores
+        run: python tools/patch_publish_tournament.py
       - name: Validar sitio antes de publicar
         run: python tools/validate_final_site.py
       - name: Configurar Pages
