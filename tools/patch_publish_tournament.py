@@ -31,9 +31,8 @@ s=s.replace(needle,replacement,1)
 # 4) Estilos limitados a esta nueva función.
 css=r'''
 <style id="COPAFEM_PUBLISH_TOURNAMENT_V1">
-.publish-tournament-btn{background:#2f7d62!important;border-color:#2f7d62!important;color:#fff!important;font-weight:900!important;min-width:92px}
-.publish-tournament-btn.is-published{background:#e8f7f1!important;border-color:#bfe5d7!important;color:#28715d!important}
-.publish-tournament-btn:disabled{opacity:1!important;cursor:default!important;transform:none!important}
+.publish-tournament-btn{background:#2f7d62!important;border-color:#2f7d62!important;color:#fff!important;font-weight:900!important;min-width:110px}
+.publish-tournament-btn.is-published{background:#fff3f0!important;border-color:#efc9c2!important;color:#a33b2d!important}
 .player-building{margin:14px 0;background:#fff;border:1px solid #dbe7f2;border-top:5px solid #7b78bd;border-radius:20px;padding:30px 24px;text-align:center;box-shadow:0 8px 26px rgba(35,58,94,.06)}
 .player-building-icon{font-size:38px;line-height:1;margin-bottom:12px}.player-building h2{margin:0 0 14px;color:#223a5e;font-size:clamp(21px,4vw,29px);letter-spacing:.02em}.player-building p{margin:7px auto;color:#5d6e84;max-width:650px;line-height:1.55;font-size:14px}.player-building strong{display:block;margin-top:17px;color:#334066;font-size:15px}
 @media(max-width:580px){.publish-tournament-btn{min-width:0;padding:8px 10px!important}.player-building{padding:24px 17px}}
@@ -44,25 +43,25 @@ if '</head>' not in s:
     raise SystemExit('No se encontró </head>')
 s=s.replace('</head>',css+'\n</head>',1)
 
-# 5) Lógica del administrador: publicar solo la fecha/categoría activa.
+# 5) Lógica del administrador: publicar o quitar publicación de la fecha/categoría activa.
 needle='''  function renderHeader(){'''
 helpers=r'''  function renderPublishButton(){
     const b=$("publishTournamentBtn"); if(!b)return;
     const hasDate=!!state?.tournament?.date;
     const published=state?.tournament?.published===true;
-    b.textContent=published?'Publicado ✓':'Publicar';
+    b.textContent=published?'Quitar publicación':'Publicar';
     b.classList.toggle('is-published',published);
-    b.disabled=!hasDate||published;
-    b.title=!hasDate?'Primero creá una fecha':published?'Este torneo ya está publicado para los jugadores':'Publicar esta fecha y categoría para los jugadores';
+    b.disabled=!hasDate;
+    b.title=!hasDate?'Primero creá una fecha':published?'Ocultar esta fecha y categoría del perfil del jugador':'Publicar esta fecha y categoría para los jugadores';
   }
 
-  function publishActiveTournament(){
+  function togglePublishActiveTournament(){
     if(!state?.tournament?.date) return toast('Primero creá una fecha');
-    if(state.tournament.published===true) return;
-    state.tournament.published=true;
+    const next=state.tournament.published!==true;
+    state.tournament.published=next;
     saveState();
     renderPublishButton();
-    toast('Torneo publicado para los jugadores');
+    toast(next?'Torneo publicado para los jugadores':'Publicación retirada del perfil del jugador');
   }
 
   function renderHeader(){
@@ -72,7 +71,7 @@ if needle not in s:
 s=s.replace(needle,helpers,1)
 
 needle='''    $("printBtn").addEventListener("click", ()=>window.print());'''
-replacement='''    $("publishTournamentBtn")?.addEventListener("click", publishActiveTournament);\n    $("printBtn").addEventListener("click", ()=>window.print());'''
+replacement='''    $("publishTournamentBtn")?.addEventListener("click", togglePublishActiveTournament);\n    $("printBtn").addEventListener("click", ()=>window.print());'''
 if needle not in s:
     raise SystemExit('No se encontró listener printBtn')
 s=s.replace(needle,replacement,1)
@@ -92,4 +91,4 @@ s=s.replace(needle,replacement,1)
 
 s=s.replace('</body>', '<!-- '+MARK+' -->\n</body>',1)
 p.write_text(s,encoding='utf-8')
-print('COPAFEM: publicación manual del torneo aplicada')
+print('COPAFEM: publicación manual reversible del torneo aplicada')
