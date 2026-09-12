@@ -7,16 +7,14 @@ if MARK in s:
     print('drop mode persistence already applied')
     raise SystemExit
 
-old='''        duration: Number(t.duration) || 30,
-        courts: Array.isArray(t.courts) && t.courts.length ? [...t.courts] : [1,3,5,7]
+needle='''        blockedCourts: Array.isArray(t.blockedCourts) ? t.blockedCourts.map(x=>({time:String(x?.time||""),court:Number(x?.court)})).filter(x=>/^\\d{2}:\\d{2}$/.test(x.time)&&Number.isFinite(x.court)&&x.court>=1&&x.court<=8) : []
 '''
-new='''        duration: Number(t.duration) || 30,
-        courts: Array.isArray(t.courts) && t.courts.length ? [...t.courts] : [1,3,5,7],
+replacement='''        blockedCourts: Array.isArray(t.blockedCourts) ? t.blockedCourts.map(x=>({time:String(x?.time||""),court:Number(x?.court)})).filter(x=>/^\\d{2}:\\d{2}$/.test(x.time)&&Number.isFinite(x.court)&&x.court>=1&&x.court<=8) : [],
         dropMode: ['op1','op2','op3'].includes(t.dropMode) ? t.dropMode : 'op1'
 '''
-if old not in s:
-    raise SystemExit('No se encontró tournament de defaultEvent')
-s=s.replace(old,new,1)
+if needle not in s:
+    raise SystemExit('No se encontró blockedCourts de defaultEvent')
+s=s.replace(needle,replacement,1)
 
 s=s.replace('</body>', '<!-- '+MARK+' -->\n</body>', 1)
 p.write_text(s,encoding='utf-8')
