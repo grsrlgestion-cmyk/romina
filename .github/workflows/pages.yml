@@ -77,6 +77,8 @@ jobs:
         run: python tools/patch_hide_positions_until_complete.py
       - name: Mostrar origen de cada A definir
         run: python tools/patch_placeholder_source_labels.py
+      - name: Mostrar zona y posición en Oro y Plata
+        run: python tools/patch_cup_zone_position_labels.py
       - name: Validar sitio antes de publicar
         run: python tools/validate_final_site.py
       - name: Configurar Pages
