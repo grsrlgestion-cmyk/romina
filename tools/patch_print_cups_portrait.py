@@ -34,7 +34,7 @@ patch=r'''
     min-height:14mm!important;
     margin:0 0 5mm!important;
     padding:3.5mm 18mm!important;
-    font-size:18pt!important;
+    font-size:21pt!important;
     line-height:1.15!important;
     text-align:center!important;
   }
@@ -43,10 +43,10 @@ patch=r'''
     right:4mm!important;
     top:50%!important;
     transform:translateY(-50%)!important;
-    font-size:10.5pt!important;
+    font-size:12pt!important;
   }
   body.copafem-print-cups-five .copafem-cups-print-subtitle{
-    font-size:17pt!important;
+    font-size:20pt!important;
     line-height:1.15!important;
     text-align:center!important;
     margin:0 0 5mm!important;
@@ -71,7 +71,7 @@ patch=r'''
     margin:0!important;
   }
   body.copafem-print-cups-five .copafem-cups-print-page .round-title{
-    font-size:13.5pt!important;
+    font-size:16pt!important;
     line-height:1.15!important;
     padding:2.4mm 3mm!important;
     margin:0 0 1mm!important;
@@ -90,7 +90,7 @@ patch=r'''
     border-radius:3mm!important;
   }
   body.copafem-print-cups-five .copafem-cups-print-page .bracket-meta{
-    font-size:10.5pt!important;
+    font-size:12pt!important;
     line-height:1.2!important;
     margin:0 0 1.5mm!important;
     text-align:center!important;
@@ -102,7 +102,7 @@ patch=r'''
     padding:1.5mm 0!important;
   }
   body.copafem-print-cups-five .copafem-cups-print-page .bracket-team span{
-    font-size:13pt!important;
+    font-size:15pt!important;
     line-height:1.25!important;
     font-weight:900!important;
     text-align:center!important;
@@ -115,7 +115,7 @@ patch=r'''
     min-width:12mm!important;
     height:10mm!important;
     padding:1mm!important;
-    font-size:11.5pt!important;
+    font-size:13pt!important;
     font-weight:800!important;
   }
 }
