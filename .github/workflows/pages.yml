@@ -85,6 +85,8 @@ jobs:
         run: python tools/patch_cup_zone_position_labels.py
       - name: Compactar impresión y mostrar categoría
         run: python tools/patch_print_compact_category.py
+      - name: Separar impresión Oro Plata en cinco hojas
+        run: python tools/patch_print_cups_five_pages.py
       - name: Validar sitio antes de publicar
         run: python tools/validate_final_site.py
       - name: Configurar Pages
