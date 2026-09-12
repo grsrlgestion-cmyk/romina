@@ -25,7 +25,6 @@ missing_fn=[x for x in required_functions if x not in s]
 if missing_fn:
     raise SystemExit('Faltan funciones críticas: '+', '.join(missing_fn))
 
-# Confirmar conexiones de los botones principales.
 listener_tokens=[
   'clearResultsBtn','generateScheduleBtn','generateZonesBtn','rebuildBracketsBtn',
   'dropPrintBtn','dropZoomOut','dropZoomIn','printBtn','addExtraCourtBtn','blockCourtBtn'
@@ -41,8 +40,9 @@ if '); copafemRefreshDropModeUI();\n  }' in s:
     raise SystemExit('Referencia insegura: copafemRefreshDropModeUI sin protección de carga')
 if 'setTimeout(()=>window.print(),120)' in s:
     raise SystemExit('Impresión del Drop todavía usa setTimeout y puede ser bloqueada por el navegador')
+if 'rebuildBrackets(false); saveState(); renderResults(); renderCups();' in s:
+    raise SystemExit('Carga de zona todavía reconstruye Resultados al salir de la primera casilla')
 
-# Validar sintaxis de cada script inline con Node.
 scripts=re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>',s,re.S|re.I)
 for i,code in enumerate(scripts,1):
     if not code.strip():
@@ -60,10 +60,10 @@ markers=[
   'COPAFEM_CLEAR_RESULTS_FIX_V1','COPAFEM_LIVE_ZONE_GAMES_V1',
   'COPAFEM_DROP_FORMAT_SELECTOR_V1','COPAFEM_DROP_FORMAT_OP3_V1',
   'COPAFEM_FINAL_WEB_AUDIT_V1','COPAFEM_PRINT_3_PAGES_V2',
-  'COPAFEM_RUNTIME_PRINT_RELIABILITY_V1'
+  'COPAFEM_RUNTIME_PRINT_RELIABILITY_V1','COPAFEM_SCORE_ENTRY_RELIABILITY_V1'
 ]
 miss_mark=[m for m in markers if m not in s]
 if miss_mark:
     raise SystemExit('Faltan parches finales: '+', '.join(miss_mark))
 
-print(f'COPAFEM VALIDACIÓN OK · {len(required_ids)} controles · {len(scripts)} scripts JS revisados · impresión directa habilitada')
+print(f'COPAFEM VALIDACIÓN OK · {len(required_ids)} controles · {len(scripts)} scripts JS revisados · scores e impresión reforzados')
