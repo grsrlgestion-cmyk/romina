@@ -141,7 +141,12 @@ patch=r'''
     return raw;
   }
   function findRound(root,name){
-    return [...(root?.querySelectorAll('.round')||[])].find(r=>(r.querySelector('.round-title')?.textContent||'').trim().toLowerCase().includes(name.toLowerCase()))||null;
+    const target=String(name||'').trim().toLowerCase();
+    return [...(root?.querySelectorAll('.round')||[])].find(r=>{
+      const title=(r.querySelector('.round-title')?.textContent||'').trim().toLowerCase();
+      if(target==='final') return title==='final';
+      return title.includes(target);
+    })||null;
   }
   function head(cat,date,label,color){
     const h=document.createElement('div');
