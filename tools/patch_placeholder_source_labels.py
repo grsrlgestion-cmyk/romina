@@ -20,7 +20,7 @@ if old not in s:
     raise SystemExit('No se encontró copafemMakeMatch')
 s=s.replace(old,new,1)
 
-# 2) Mostrar al lado de "A definir" de dónde sale esa pareja.
+# 2) Mostrar siempre el origen del lugar y, a su lado, A definir o el nombre real.
 needle='''  function bracketTeam(kind,m,pSide,sSide){
     const id=m[pSide],real=!!id&&!String(id).startsWith("__TBD__"),name=real?pairName(id):"A definir";return `<div class="bracket-team"><span class="${real?"":"placeholder"}">${esc(name)}</span><input type="number" min="0" inputmode="numeric" ${real?"":"disabled"} value="${real?(m[sSide]??""):""}" data-kind="${kind}" data-bscore="${m.id}" data-side="${sSide}"></div>`;
   }'''
@@ -39,7 +39,7 @@ replacement='''  function copafemDescribeSourceMatch(id){
   function copafemSourceLabel(key){
     const raw=String(key||"");
     const seed=raw.match(/^([1-9])([A-Z])$/);
-    if(seed) return `${seed[1]}.º Zona ${seed[2]}`;
+    if(seed) return `${seed[1]}° ZONA ${seed[2]}`;
     const flow=raw.match(/^([WL]):(.+)$/);
     if(flow) return `${flow[1]==="W"?"Ganador":"Perdedor"} de ${copafemDescribeSourceMatch(flow[2])}`;
     return "";
@@ -51,7 +51,7 @@ replacement='''  function copafemDescribeSourceMatch(id){
     if(fromSource) return fromSource;
     const id=String(m[pSide]||"");
     let legacy=id.match(/^__TBD__[GS]-(\\d+)-([A-Z])$/);
-    if(legacy) return `${legacy[1]}.º Zona ${legacy[2]}`;
+    if(legacy) return `${legacy[1]}° ZONA ${legacy[2]}`;
     legacy=id.match(/^__TBD__S-GL-(\\d+)$/);
     if(legacy) return `Perdedor de Oro ${legacy[1]}`;
     return "";
@@ -59,8 +59,9 @@ replacement='''  function copafemDescribeSourceMatch(id){
 
   function bracketTeam(kind,m,pSide,sSide){
     const id=m[pSide],real=!!id&&!String(id).startsWith("__TBD__");
-    const source=real?"":copafemPlaceholderLabel(m,pSide);
-    const name=real?pairName(id):`A definir${source?` · ${source}`:""}`;
+    const source=copafemPlaceholderLabel(m,pSide);
+    const participant=real?pairName(id):"A definir";
+    const name=source?`${source} · ${participant}`:participant;
     return `<div class="bracket-team"><span class="${real?"":"placeholder"}">${esc(name)}</span><input type="number" min="0" inputmode="numeric" ${real?"":"disabled"} value="${real?(m[sSide]??""):""}" data-kind="${kind}" data-bscore="${m.id}" data-side="${sSide}"></div>`;
   }'''
 if needle not in s:
@@ -69,4 +70,4 @@ s=s.replace(needle,replacement,1)
 
 s=s.replace('</body>',f'\n<!-- {MARK} -->\n</body>',1)
 p.write_text(s,encoding='utf-8')
-print('COPAFEM: A definir ahora muestra posición/zona o cruce de origen')
+print('COPAFEM: cada lugar de Oro/Plata muestra su origen y luego A definir o el nombre real')
