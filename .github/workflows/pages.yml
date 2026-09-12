@@ -43,6 +43,8 @@ jobs:
         run: python tools/patch_extra_courts_by_time.py
       - name: Elegir canchas por horario al crear categoría
         run: python tools/patch_new_event_courts_by_time.py
+      - name: Corregir validación de rangos horarios
+        run: python tools/patch_fix_new_event_range_validation.py
       - name: Sincronizar badge con categoría elegida
         run: python tools/patch_new_event_badge.py
       - name: Corregir eliminación de última categoría
