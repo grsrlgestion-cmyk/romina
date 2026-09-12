@@ -37,14 +37,14 @@ jobs:
         run: python tools/patch_visible_future_cup_matches.py
       - name: Asignar canchas sin superposición
         run: python tools/patch_court_allocator.py
+      - name: Corregir borrado de resultados
+        run: python tools/patch_clear_results.py
       - name: Agregar canchas extra por horario
         run: python tools/patch_extra_courts_by_time.py
       - name: Elegir formato de Oro y Plata
         run: python tools/patch_drop_format_selector.py
       - name: Agregar Opción 3 máximo cupo
         run: python tools/patch_drop_format_op3.py
-      - name: Corregir borrado de resultados
-        run: python tools/patch_clear_results.py
       - name: Mostrar solo zonas y cruces reales con horario/cancha
         run: python tools/patch_drop_schedule.py
       - name: Agrandar el Drop para impresión
@@ -61,6 +61,8 @@ jobs:
         run: python tools/patch_print_results_one_zone.py
       - name: Auditoría final de botones, resultados, impresión y Drop
         run: python tools/patch_final_web_audit.py
+      - name: Reforzar runtime, botones e impresión por categoría
+        run: python tools/patch_runtime_print_reliability.py
       - name: Validar sitio antes de publicar
         run: python tools/validate_final_site.py
       - name: Configurar Pages
