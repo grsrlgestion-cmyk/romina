@@ -102,7 +102,7 @@ patch=r'''
     padding:1.5mm 0!important;
   }
   body.copafem-print-cups-five .copafem-cups-print-page .bracket-team span{
-    font-size:18pt!important;
+    font-size:24pt!important;
     line-height:1.25!important;
     font-weight:900!important;
     text-align:center!important;
