@@ -59,6 +59,10 @@ jobs:
         run: python tools/patch_drop_zones_two_columns.py
       - name: Imprimir una zona por hoja en Resultados
         run: python tools/patch_print_results_one_zone.py
+      - name: Auditoría final de botones, resultados, impresión y Drop
+        run: python tools/patch_final_web_audit.py
+      - name: Validar sitio antes de publicar
+        run: python tools/validate_final_site.py
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
@@ -70,5 +74,3 @@ jobs:
       - name: Publicar
         id: deployment
         uses: actions/deploy-pages@v4
-
-# Publicación forzada para activar el selector de los 3 formatos de Drop y el borrado correcto de resultados.
