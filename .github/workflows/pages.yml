@@ -75,6 +75,8 @@ jobs:
         run: python tools/patch_runtime_print_reliability.py
       - name: Mostrar posiciones solo con zona completa
         run: python tools/patch_hide_positions_until_complete.py
+      - name: Mostrar origen de cada A definir
+        run: python tools/patch_placeholder_source_labels.py
       - name: Validar sitio antes de publicar
         run: python tools/validate_final_site.py
       - name: Configurar Pages
