@@ -103,6 +103,8 @@ jobs:
         run: python tools/patch_shift_schedule_after_1230.py
       - name: Respetar 30 minutos entre cruces dependientes
         run: python tools/patch_bracket_dependency_wait_30.py
+      - name: Persistir corrimiento horario también en datos online
+        run: python tools/patch_force_shift_sep13_persist.py
       - name: Validar sitio antes de publicar
         run: python tools/validate_final_site.py
       - name: Configurar Pages
