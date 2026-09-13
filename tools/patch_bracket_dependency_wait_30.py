@@ -2,23 +2,34 @@ from pathlib import Path
 
 p=Path('index.html')
 s=p.read_text(encoding='utf-8')
-MARK='COPAFEM_BRACKET_DEPENDENCY_WAIT_30_V1'
+MARK='COPAFEM_BRACKET_DEPENDENCY_WAIT_30_V2'
 if MARK in s:
-    print('dependency wait already applied')
+    print('dependency wait v2 already applied')
     raise SystemExit
 
 patch=r'''
-<script id="COPAFEM_BRACKET_DEPENDENCY_WAIT_30_V1">
+<script id="COPAFEM_BRACKET_DEPENDENCY_WAIT_30_V2">
 (() => {
-  const TARGET_DATE='2026-09-13';
   const WAIT=30;
 
+  function targetDate(value){
+    const d=String(value||'').trim();
+    return d==='2026-09-13' || d==='13/09/2026';
+  }
+
   function dateEntries(){
-    const entries=(typeof eventsOnDate==='function')?eventsOnDate(TARGET_DATE):[];
-    if(String(state?.tournament?.date||'')===TARGET_DATE && !entries.some(([,ev])=>ev===state)){
-      entries.push([store?.activeEventId||'active',state]);
+    const out=[];
+    const seen=new Set();
+    const add=(id,ev)=>{
+      if(!ev || !targetDate(ev?.tournament?.date) || seen.has(ev)) return;
+      seen.add(ev); out.push([id,ev]);
+    };
+    if(typeof eventsOnDate==='function'){
+      try{ (eventsOnDate('2026-09-13')||[]).forEach(([id,ev])=>add(id,ev)); }catch(_e){}
+      try{ (eventsOnDate('13/09/2026')||[]).forEach(([id,ev])=>add(id,ev)); }catch(_e){}
     }
-    return entries;
+    if(targetDate(state?.tournament?.date)) add((typeof store!=='undefined'&&store?.activeEventId)||'active',state);
+    return out;
   }
 
   function bracketMatches(ev){
@@ -66,13 +77,13 @@ patch=r'''
   }
 
   function enforceEvent(ev,entries){
-    if(!ev || String(ev?.tournament?.date||'')!==TARGET_DATE) return false;
+    if(!ev || !targetDate(ev?.tournament?.date)) return false;
     const ms=bracketMatches(ev);
     const byId=new Map(ms.map(m=>[String(m.id),m]));
     let changed=false;
 
-    // Varias pasadas para que, si se mueve un Cuarto, también se corran
-    // Semifinal y Final cuando dependan de ese partido.
+    // Si un partido espera ganador/perdedor de otro, debe comenzar al menos
+    // 30 minutos después del horario de ese partido anterior.
     for(let pass=0;pass<20;pass++){
       let passChanged=false;
       for(const m of ms){
@@ -86,8 +97,8 @@ patch=r'''
         const current=parseTime(m.time);
         if(!Number.isFinite(current) || current>=required) continue;
 
-        // Mantener la misma cancha. Si esa cancha ya está ocupada en el primer
-        // horario válido, avanzar de a 30 min hasta encontrarla libre.
+        // No cambiar cancha. Si esa misma cancha está ocupada, avanzar de a
+        // 30 minutos hasta que quede disponible.
         let candidate=required;
         let guard=0;
         while(courtBusy(entries,ev,m,candidate) && guard++<40) candidate+=WAIT;
@@ -107,8 +118,7 @@ patch=r'''
     return changed;
   }
 
-  // Se aplica después del corrimiento general de +30 min. Cada vez que el
-  // sistema recompone horarios, controla dependencias ganador/perdedor -> ronda siguiente.
+  // Este parche se carga después del corrimiento 12:30 -> 13:00.
   if(typeof window.copafemScheduleDateNoConflicts==='function'){
     const original=window.copafemScheduleDateNoConflicts;
     window.copafemScheduleDateNoConflicts=function(){
@@ -120,15 +130,14 @@ patch=r'''
     try{ copafemScheduleDateNoConflicts=window.copafemScheduleDateNoConflicts; }catch(_e){}
   }
 
-  // Controlar también el cronograma ya guardado al abrir la web.
   window.addEventListener('load',()=>setTimeout(()=>{
     try{
       if(enforceAll()){
         if(typeof saveState==='function') saveState();
         if(typeof renderAll==='function') renderAll();
       }
-    }catch(err){console.error('COPAFEM dependency wait:',err);}
-  },0));
+    }catch(err){console.error('COPAFEM dependency wait v2:',err);}
+  },20));
 })();
 </script>
 '''
@@ -138,4 +147,4 @@ if '</body>' not in s:
 head,tail=s.rsplit('</body>',1)
 s=head+patch+'\n</body>'+tail
 p.write_text(s,encoding='utf-8')
-print('COPAFEM: cruces dependientes esperan al menos 30 minutos sin cambiar cancha')
+print('COPAFEM: cada cruce dependiente espera al menos 30 minutos sin cambiar cancha')
