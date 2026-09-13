@@ -99,6 +99,8 @@ jobs:
         run: python tools/patch_publish_tournament.py
       - name: Imprimir todas las canchas juntas y ordenadas
         run: python tools/patch_print_courts_all_together.py
+      - name: Mover media hora los partidos desde las 12:30 del 13 de septiembre
+        run: python tools/patch_shift_schedule_after_1230.py
       - name: Validar sitio antes de publicar
         run: python tools/validate_final_site.py
       - name: Configurar Pages
