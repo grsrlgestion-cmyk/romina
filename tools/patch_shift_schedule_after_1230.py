@@ -2,13 +2,13 @@ from pathlib import Path
 
 p=Path('index.html')
 s=p.read_text(encoding='utf-8')
-MARK='COPAFEM_SHIFT_2026_09_13_AFTER_1230_V2'
+MARK='COPAFEM_SHIFT_2026_09_13_AFTER_1230_V3'
 if MARK in s:
-    print('shift after 12:30 v2 already applied')
+    print('shift after 12:30 v3 already applied')
     raise SystemExit
 
 patch=r'''
-<script id="COPAFEM_SHIFT_2026_09_13_AFTER_1230_V2">
+<script id="COPAFEM_SHIFT_2026_09_13_AFTER_1230_V3">
 (() => {
   const FROM=parseTime('12:30');
   const SHIFT=30;
@@ -26,8 +26,12 @@ patch=r'''
     return [...(ev?.zoneMatches||[]),...(ev?.brackets?.gold||[]),...(ev?.brackets?.silver||[])];
   }
 
+  function hasExact1230(ev){
+    return eventMatches(ev) && allMatches(ev).some(m=>String(m?.time||'')==='12:30');
+  }
+
   function shiftAllFrom1230(ev){
-    if(!eventMatches(ev)) return false;
+    if(!hasExact1230(ev)) return false;
     let changed=false;
     allMatches(ev).forEach(m=>{
       if(!m?.time) return;
@@ -37,11 +41,8 @@ patch=r'''
         changed=true;
       }
     });
+    if(ev?.tournament) ev.tournament.copafemShiftAfter1230V3=true;
     return changed;
-  }
-
-  function hasExact1230(ev){
-    return allMatches(ev).some(m=>String(m?.time||'')==='12:30');
   }
 
   function entriesForTargetDate(){
@@ -59,43 +60,40 @@ patch=r'''
     return out;
   }
 
-  function correctSavedScheduleOnce(){
+  function applyShift(){
     let changed=false;
-    for(const [,ev] of entriesForTargetDate()){
-      if(ev?.tournament?.copafemShiftAfter1230V2) continue;
-
-      // Si todavía existe al menos un partido a las 12:30, el corrimiento
-      // anterior no quedó reflejado en el cronograma guardado: aplicarlo ahora.
-      // Si la versión anterior nunca se ejecutó, aplicarlo también.
-      const oldMarked=!!ev?.tournament?.copafemShiftAfter1230V1;
-      if(hasExact1230(ev) || !oldMarked){
-        if(shiftAllFrom1230(ev)) changed=true;
-      }
-      if(ev?.tournament) ev.tournament.copafemShiftAfter1230V2=true;
-    }
+    entriesForTargetDate().forEach(([,ev])=>{ if(shiftAllFrom1230(ev)) changed=true; });
     return changed;
   }
 
-  // Cada vez que se recomponga el cronograma del 13/09, volver a aplicar
-  // exactamente +30 min desde 12:30 sobre el cronograma recién generado.
+  // Si el cronograma se regenera y vuelve a aparecer 12:30, corregirlo nuevamente.
+  // La condición "existe 12:30" hace que sea idempotente: una vez movido a 13:00
+  // no vuelve a sumar otros 30 minutos.
   if(typeof window.copafemScheduleDateNoConflicts==='function'){
     const original=window.copafemScheduleDateNoConflicts;
     window.copafemScheduleDateNoConflicts=function(){
       const ok=original.apply(this,arguments);
       if(!ok) return ok;
-      entriesForTargetDate().forEach(([,ev])=>shiftAllFrom1230(ev));
+      applyShift();
       return ok;
     };
     try{ copafemScheduleDateNoConflicts=window.copafemScheduleDateNoConflicts; }catch(_e){}
   }
 
-  window.addEventListener('load',()=>setTimeout(()=>{
+  function tryApply(){
     try{
-      const changed=correctSavedScheduleOnce();
-      if(typeof saveState==='function') saveState();
-      if(changed && typeof renderAll==='function') renderAll();
-    }catch(err){ console.error('COPAFEM shift 12:30 v2:',err); }
-  },0));
+      if(applyShift()){
+        if(typeof saveState==='function') saveState();
+        if(typeof renderAll==='function') renderAll();
+      }
+    }catch(err){ console.error('COPAFEM shift 12:30 v3:',err); }
+  }
+
+  // Reintentos para cubrir el caso en que el estado guardado todavía no terminó
+  // de cargarse cuando dispara el evento load.
+  window.addEventListener('load',()=>{
+    [50,250,750,1500,3000].forEach(ms=>setTimeout(tryApply,ms));
+  });
 })();
 </script>
 '''
@@ -105,4 +103,4 @@ if '</body>' not in s:
 head,tail=s.rsplit('</body>',1)
 s=head+patch+'\n</body>'+tail
 p.write_text(s,encoding='utf-8')
-print('COPAFEM: 12:30 pasa a 13:00 y todos los horarios posteriores avanzan 30 minutos')
+print('COPAFEM: corrimiento reforzado 12:30 -> 13:00 y posteriores +30 min')
