@@ -140,6 +140,15 @@ button,input,select,textarea{font:inherit}.topbar{position:sticky;top:0;z-index:
   .cover-admin{left:81.5%;top:64.5%;width:17%;height:24%;}
 }
 
+  
+/* Aviso próximo Americano */
+.next-americano-notice{max-width:760px;margin:18px auto 0;padding:15px 18px;text-align:center;background:#fff;border:1px solid #d8e6f2;border-radius:18px;box-shadow:0 8px 24px rgba(35,58,94,.08);color:#233a59}
+.next-americano-notice strong{display:block;font-size:16px;letter-spacing:.02em;margin-bottom:5px}
+.next-americano-notice p{margin:3px 0;font-size:13px;line-height:1.45;color:#5b6f86}
+.next-americano-notice .next-date{font-weight:850;color:#d56a1f}
+.next-americano-notice .thanks{font-weight:750;color:#59667a}
+@media(max-width:700px){.next-americano-notice{margin:14px 12px 0;padding:13px 14px;border-radius:15px}.next-americano-notice strong{font-size:15px}.next-americano-notice p{font-size:12px}}
+
   </style>
 </head>
 <body>
@@ -150,6 +159,14 @@ button,input,select,textarea{font:inherit}.topbar{position:sticky;top:0;z-index:
       <button id="choosePlayer" class="cover-hit cover-player" type="button" aria-label="Soy jugador"></button>
       <button id="chooseAdmin" class="cover-hit cover-admin" type="button" aria-label="Administrador"></button>
     </div>
+
+    <div id="nextAmericanoNotice" class="next-americano-notice" role="status" aria-live="polite">
+      <strong>🎾 PRÓXIMO AMERICANO COPAFEM</strong>
+      <p>Aún no hay una nueva fecha programada.</p>
+      <p class="next-date">📅 Próximamente anunciaremos la próxima.</p>
+      <p class="thanks">¡Gracias por ser parte de COPAFEM! 💜</p>
+    </div>
+
     <div id="adminLogin" class="login-card cover-login" hidden>
       <h2>Acceso administrador</h2><p>Ingresá la contraseña para abrir el panel de organización.</p>
       <form id="adminLoginForm"><label>Contraseña<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Contraseña de administrador"></label><div class="login-actions"><button class="btn primary" type="submit">Ingresar</button><button id="cancelAdminLogin" class="btn" type="button">Volver</button></div><div id="adminLoginError" class="login-error" aria-live="polite"></div></form>
